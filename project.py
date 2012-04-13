@@ -118,6 +118,7 @@ ARG2
 This list is NOT exhaustive!
 Sometimes idiosyncratic properties of particular words cause there to be additional argument types.
 
+
 Special labels: PRED and SUPPORT
     - PRED marks the predicate of the relations. One example is generated for each predicate.
     - SUPPORT marks words that connect the predicate with one or more of its arguments when they do not occur close by
