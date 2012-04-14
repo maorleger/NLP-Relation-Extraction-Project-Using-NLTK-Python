@@ -408,12 +408,12 @@ class MaxEntRelationTagger():
             if 0 < len(tokenList[i]) < 7:
                 raise Exception('Error: Invalid token. Token: {0}'.format(tokenList[i]))
             (word, POS, BIO, wordNum, sentNum, keyTag) = tokenList[i][:6]
-            #            if tokenList[i][6] != 'None':
-            #                keyClass = tokenList[i][6]
-            #            else:
-            #                keyClass = ''
-            keyClass = tokenList[i][6]
-            #keyTag = keyTag.replace('None', '')
+            #if tokenList[i][6] != 'None':
+            #    keyClass = tokenList[i][6]
+            #else:
+            #    keyClass = ''
+            keyClass = tokenList[i][6].replace('None', '')
+            keyTag = keyTag.replace('None', '')
             if i == arg0Pos:
                 sysTag = 'ARG0'
             elif i == arg1Pos:
@@ -423,10 +423,11 @@ class MaxEntRelationTagger():
             elif i == arg3Pos:
                 sysTag = 'ARG3'
             else:
-                sysTag = 'None'
+                sysTag = ''
             outFile.write(
-                '{0:20}{1:20}{2:20}{3:20}{4:20}{5:20}{6:20}{7:20}\n'.format(word, POS, BIO, wordNum, sentNum, keyTag,
-                                                                            sysTag, keyClass))
+                '{0}\t\t{1}\t\t{2}\t\t{3}\t\t{4}\t\t{5}\t\t{6}\t\t{7}\n'.format(word, POS, BIO, wordNum, sentNum, keyTag
+                                                                                ,
+                                                                                sysTag, keyClass))
 
 
     def getMaxEntValues(self):
@@ -452,7 +453,7 @@ def main():
         print('Usage: python2.6 hw7.py [devFileName] [outputFileName]')
         exit(1)
     MaxEntTagger = MaxEntRelationTagger(args[0], args[1])
-    MaxEntTagger.TrainModel(100, 2)
+    #MaxEntTagger.TrainModel(100, 2)
     MaxEntTagger.MaxEntTagFile()
 
 if __name__ == '__main__':

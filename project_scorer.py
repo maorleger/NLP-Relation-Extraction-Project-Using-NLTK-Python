@@ -46,24 +46,53 @@ __author__ = 'mleger'
 import sys, os, traceback, optparse
 import time
 
+
+# TODO: Fix this issue. Seems like the following work:
+# Key
+# correct
+# some system args arent being taken into account
 #noinspection PyUnboundLocalVariable
-def score(outputFile):
+def score(sysOutFile, keyOutFile):
     correct = 0
     key = 0
     system = 0
-    lst = outputFile.readlines()
-    for line in lst:
-        lineTup = line.split()
-        if lineTup:
-            sentNum = lineTup[4]
-            # TODO: add if len(lineTup) == 7 and if len(lineTup) == 8 cases
-            # for now, leaving 'None' tags there to make my life easier :)
-            if lineTup[6] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
+    sysOut = sysOutFile.readlines()
+    keyOut = keyOutFile.readlines()
+    if len(sysOut) <> len(keyOut):
+        raise Exception("dev and output file are not of same length")
+    for sysLine, keyLine in zip(sysOut, keyOut):
+        sysTup = sysLine.split()
+        keyTup = keyLine.split()
+        haveKey = False
+        haveSys = False
+        if sysTup and keyTup:
+            sentNum = sysTup[4]
+        #            # get system variable
+        #            if len(sysTup) > 6 and sysTup[5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
+        #                # sysTup and keyTup on same line
+        #                system += 1
+        #                key += 1
+        #                if sysTup[5] == sysTup[6]:
+        #                    correct += 1
+        #            elif len(sysTup) == 6:
+        #                # only one arg here, need to figure out if its key arg or sys arg
+        #                if len(keyTup) > 5 and keyTup[5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
+        #                    # keytup has something.
+        #                    key += 1
+        #                elif sysTup[5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
+        #                    system += 1
+        #            # no args here, need to check if key arg has an additional parameter
+        #            elif len(keyTup) > 5 and keyTup[5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
+        #                key += 1
+        if len(keyTup) > 5 and keyTup[5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
+            key += 1
+        if len(sysTup) > 6 and sysTup[6] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
+            system += 1
+            if sysTup[6] == sysTup[5]:
+                correct += 1
+        elif len(sysTup) == 6 and sysTup[5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
+            if len(keyTup) < 6 or keyTup[5] not in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
                 system += 1
-                if lineTup[5] == lineTup[6]:
-                    correct += 1
-            if lineTup[5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
-                key += 1
     correct = float(correct)
     system = float(system)
     key = float(key)
@@ -79,17 +108,20 @@ def score(outputFile):
                 raise Exception("Something went wrong...")
             fscore = 0.0
     print('Number of sentences = {0}\t Number of tokens = {1}\n'.format(int(sentNum) + 1,
-                                                                        len([item for item in lst if item])))
+                                                                        len([item for item in sysOut if item])))
+    print('correct = {0}\tsystem = {1}\tkey = {2}\n'.format(correct, system, key))
     print('Precision = {0}\tRecall = {1}\tF-Score = {2}\n'.format(precision, recall, fscore))
 
 
 def main():
     global options, args
-    if len(args) < 1:
-        print('Usage: python2.6 project_scorer.py SystemOutputFileName')
+    if len(args) < 2:
+        print('Usage: python2.6 project_scorer.py SystemOutputFileName KeyFile')
         exit(1)
-    outputFile = open(args[0])
-    score(outputFile)
+    sysOutFile = open(args[0])
+    keyOutFile = open(args[1])
+
+    score(sysOutFile, keyOutFile)
 
 if __name__ == '__main__':
     try:
