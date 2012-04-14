@@ -47,10 +47,11 @@ import sys, os, traceback, optparse
 import time
 
 
-# TODO: Fix this issue. Seems like the following work:
-# Key
-# correct
-# some system args arent being taken into account
+# correct values:
+# Key = 420
+# system as of 4/14 = 894
+# correct as of 4/14 = 197
+
 #noinspection PyUnboundLocalVariable
 def score(sysOutFile, keyOutFile):
     correct = 0
