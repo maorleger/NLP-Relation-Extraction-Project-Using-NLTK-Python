@@ -150,8 +150,11 @@ import subprocess as sub
 
 
 
+
+
 class MaxEntRelationTagger():
     """The MaxEntRelationTagger class - contains everything needed to run a MaxEntRelationTagger tagger"""
+
     def __init__(self, devFileName, outFileName):
         """constructor for MaxEntRelationTagger"""
         self.featuresFileName = 'features.dat'
@@ -184,13 +187,15 @@ class MaxEntRelationTagger():
                 oneSent.append(item)
             else:
                 i += 1
-                print('i={0} %completed={1}'.format(i, float(i)/totalSents))
+                print('i={0} %completed={1}'.format(i, float(i) / totalSents))
                 self.writeAllWordFeatures(oneSent, dataFile, True, True)
                 oneSent = []
         dataFile.close()
-        print('Running java -jar -Xmx1024m MaxEntCreatModel.jar {0} {1} {2}'.format(self.featuresFileName, numIterations,
-                                                                                    featureCutOff))
-        sub.call(["java", "-jar", "-Xmx1024m", "MaxEntCreatModel.jar", self.featuresFileName, numIterations, featureCutOff])
+        print(
+        'Running java -jar -Xmx1024m MaxEntCreatModel.jar {0} {1} {2}'.format(self.featuresFileName, numIterations,
+                                                                              featureCutOff))
+        sub.call(
+            ["java", "-jar", "-Xmx1024m", "MaxEntCreatModel.jar", self.featuresFileName, numIterations, featureCutOff])
         print('Done training...\n')
 
 
@@ -262,7 +267,7 @@ class MaxEntRelationTagger():
             item = tokensBetween[i]
             if item.startswith('B'):
                 ChunkChain.append(item[2:])
-            elif item == 'O' and tokensBetween[i-1] != 'O':
+            elif item == 'O' and tokensBetween[i - 1] != 'O':
                 ChunkChain.append('O')
         ChunkChain = '_'.join(ChunkChain)
 
@@ -272,16 +277,16 @@ class MaxEntRelationTagger():
             existSupportBetweenCandPred = True
 
         return {
-            'tokensBetweenCandPred':tokensBetweenCandPred,
-            'numberOfTokensBetween':numberOfTokensBetween,
-            'possBetweenCandPred':possBetweenCandPred,
-            'existVerbBetweenCandPred':existVerbBetweenCandPred,
-            'BIOChunkChain':BIOChunkChain,
-            'ChunkChain':ChunkChain,
-            'candPredInSameNP':candPredInSameNP,
-            'candPredInSameVP':candPredInSameVP,
-            'candPredInSamePP':candPredInSamePP,
-            'existSupportBetweenCandPred':existSupportBetweenCandPred
+            'tokensBetweenCandPred': tokensBetweenCandPred,
+            'numberOfTokensBetween': numberOfTokensBetween,
+            'possBetweenCandPred': possBetweenCandPred,
+            'existVerbBetweenCandPred': existVerbBetweenCandPred,
+            'BIOChunkChain': BIOChunkChain,
+            'ChunkChain': ChunkChain,
+            'candPredInSameNP': candPredInSameNP,
+            'candPredInSameVP': candPredInSameVP,
+            'candPredInSamePP': candPredInSamePP,
+            'existSupportBetweenCandPred': existSupportBetweenCandPred
         }
 
 
@@ -293,12 +298,13 @@ class MaxEntRelationTagger():
         """
 
         # Only consider negative samples if the POS is in negPOSSampleList
-        negPOSSampleList = ['NN', 'NNS', 'NNP', 'JJ', 'PRP', 'CD', 'DT', 'NNPS', 'VBG', 'FW', 'IN', 'RB', 'VBZ', 'WDT', 'WP']
+        negPOSSampleList = ['NN', 'NNS', 'NNP', 'JJ', 'PRP', 'CD', 'DT', 'NNPS', 'VBG', 'FW', 'IN', 'RB', 'VBZ', 'WDT',
+                            'WP']
         for i in xrange(0, len(sent)):
             if not limitedSet or (sent[i][5] in ['ARG1'] or sent[i][1] in negPOSSampleList):
                 featuresDict = {
-                    'candToken':sent[i][0],
-                    'candTokenPOS':sent[i][1]
+                    'candToken': sent[i][0],
+                    'candTokenPOS': sent[i][1]
                 }
                 if listOutput:
                     if sent[i][5] == 'ARG1':
@@ -309,12 +315,12 @@ class MaxEntRelationTagger():
                     featuresDict['output'] = '?'
                 if i > 0:
                     # can use token before candidate
-                    featuresDict['tokenBeforeCand'] = sent[i-1][0]
-                    featuresDict['posBeforeCand'] = sent[i-1][1]
+                    featuresDict['tokenBeforeCand'] = sent[i - 1][0]
+                    featuresDict['posBeforeCand'] = sent[i - 1][1]
                 if i < len(sent) - 1:
                     # can use token after candidate
-                    featuresDict['tokenAfterCand'] = sent[i+1][0]
-                    featuresDict['posAfterCand'] = sent[i+1][1]
+                    featuresDict['tokenAfterCand'] = sent[i + 1][0]
+                    featuresDict['posAfterCand'] = sent[i + 1][1]
                 spList = zip(*sent)
                 if spList[5].count('PRED') > 0:
                     predIndex = spList[5].index('PRED')
@@ -322,7 +328,9 @@ class MaxEntRelationTagger():
                         featuresDict.update(self.getFeatures(i, predIndex, spList))
                     else:
                         featuresDict.update(self.getFeatures(predIndex, i, spList))
-                    outputFile.write('{0} {1}\n'.format(" ".join(['%s=%s' %(key, value) for key, value in featuresDict.iteritems() if key != 'output' and value != '']), featuresDict['output']))
+                    outputFile.write('{0} {1}\n'.format(" ".join(
+                        ['%s=%s' % (key, value) for key, value in featuresDict.iteritems() if
+                         key != 'output' and value != '']), featuresDict['output']))
 
 
     def GetPredictions(self):
@@ -394,16 +402,9 @@ class MaxEntRelationTagger():
         ret = {}
         for i in xrange(0, len(values), 2):
             var1 = values[i].split('[')
-            var2 = values[i+1].split('[')
-            ret[i/2] = (float(var1[1].split(']')[0]), float(var2[1].split(']')[0]))
+            var2 = values[i + 1].split('[')
+            ret[i / 2] = (float(var1[1].split(']')[0]), float(var2[1].split(']')[0]))
         return ret
-
-
-
-
-
-
-
 
 
 def main():
