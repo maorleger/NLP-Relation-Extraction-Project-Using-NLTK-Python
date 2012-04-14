@@ -63,27 +63,8 @@ def score(sysOutFile, keyOutFile):
     for sysLine, keyLine in zip(sysOut, keyOut):
         sysTup = sysLine.split()
         keyTup = keyLine.split()
-        haveKey = False
-        haveSys = False
         if sysTup and keyTup:
             sentNum = sysTup[4]
-        #            # get system variable
-        #            if len(sysTup) > 6 and sysTup[5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
-        #                # sysTup and keyTup on same line
-        #                system += 1
-        #                key += 1
-        #                if sysTup[5] == sysTup[6]:
-        #                    correct += 1
-        #            elif len(sysTup) == 6:
-        #                # only one arg here, need to figure out if its key arg or sys arg
-        #                if len(keyTup) > 5 and keyTup[5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
-        #                    # keytup has something.
-        #                    key += 1
-        #                elif sysTup[5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
-        #                    system += 1
-        #            # no args here, need to check if key arg has an additional parameter
-        #            elif len(keyTup) > 5 and keyTup[5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
-        #                key += 1
         if len(keyTup) > 5 and keyTup[5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
             key += 1
         if len(sysTup) > 6 and sysTup[6] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
