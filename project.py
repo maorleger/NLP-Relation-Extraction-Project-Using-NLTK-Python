@@ -158,7 +158,10 @@ class MaxEntRelationTagger():
     def __init__(self, devFileName, outFileName):
         """constructor for MaxEntRelationTagger"""
         self.featuresFileName = 'features.dat'
-        self.trainingFileName = 'training'
+        if devFileName == 'dev-subset':
+            self.trainingFileName = 'training-subset'
+        else:
+            self.trainingFileName = 'training'
         self.devFileName, self.outFileName = devFileName, outFileName
         self.modelFileName, self.predictFileName, self.testFileName = 'featuresModel.txt', 'features.predictions', 'features.test'
 
@@ -192,8 +195,8 @@ class MaxEntRelationTagger():
                 oneSent = []
         dataFile.close()
         print(
-        'Running java -jar -Xmx1024m MaxEntCreatModel.jar {0} {1} {2}'.format(self.featuresFileName, numIterations,
-                                                                              featureCutOff))
+            'Running java -jar -Xmx1024m MaxEntCreatModel.jar {0} {1} {2}'.format(self.featuresFileName, numIterations,
+                                                                                  featureCutOff))
         sub.call(
             ["java", "-jar", "-Xmx1024m", "MaxEntCreatModel.jar", self.featuresFileName, numIterations, featureCutOff])
         print('Done training...\n')
@@ -298,17 +301,19 @@ class MaxEntRelationTagger():
         """
 
         # Only consider negative samples if the POS is in negPOSSampleList
-        negPOSSampleList = ['NN', 'NNS', 'NNP', 'JJ', 'PRP', 'CD', 'DT', 'NNPS', 'VBG', 'FW', 'IN', 'RB', 'VBZ', 'WDT',
-                            'WP']
+        #negPOSSampleList = ['NN', 'NNS', 'NNP', 'JJ', 'PRP', 'CD', 'DT', 'NNPS', 'VBG', 'FW', 'IN', 'RB', 'VBZ', 'WDT',
+        #                    'WP']
+        negPOSSampleList = ['NN', 'NNS', 'NNP', 'VBD', 'PRP$', 'JJ', 'IN', 'VB', 'VBN', 'VBG', 'VBZ', 'CD', 'PRP',
+                            'NNPS', 'VBP', 'DT', 'JJR', 'WP$', 'WP', 'RBR', 'RB', 'JJS', 'WDT', 'TO', '$', 'WRB', '``']
         for i in xrange(0, len(sent)):
-            if not limitedSet or (sent[i][5] in ['ARG1'] or sent[i][1] in negPOSSampleList):
+            if not limitedSet or (sent[i][5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3'] or sent[i][1] in negPOSSampleList):
                 featuresDict = {
                     'candToken': sent[i][0],
                     'candTokenPOS': sent[i][1]
                 }
                 if listOutput:
-                    if sent[i][5] == 'ARG1':
-                        featuresDict['output'] = 'ARG1'
+                    if sent[i][5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
+                        featuresDict['output'] = sent[i][5]
                     else:
                         featuresDict['output'] = 'None'
                 else:
@@ -324,13 +329,15 @@ class MaxEntRelationTagger():
                 spList = zip(*sent)
                 if spList[5].count('PRED') > 0:
                     predIndex = spList[5].index('PRED')
+                    if spList[6][predIndex] != 'None':
+                        featuresDict['relationClass'] = spList[6][predIndex]
                     if i < predIndex:
                         featuresDict.update(self.getFeatures(i, predIndex, spList))
                     else:
                         featuresDict.update(self.getFeatures(predIndex, i, spList))
-                    outputFile.write('{0} {1}\n'.format(" ".join(
-                        ['%s=%s' % (key, value) for key, value in featuresDict.iteritems() if
-                         key != 'output' and value != '']), featuresDict['output']))
+                outputFile.write('{0} {1}\n'.format(" ".join(
+                    ['%s=%s' % (key, value) for key, value in featuresDict.iteritems() if
+                     key != 'output' and value != '']), featuresDict['output']))
 
 
     def GetPredictions(self):
@@ -347,6 +354,8 @@ class MaxEntRelationTagger():
         for line in raw:
             line = line.strip().split()
             if len(line) == 5:
+                line.append('None')
+            if len(line) == 6:
                 line.append('None')
             if 5 > len(line) > 0:
                 raise Exception
@@ -372,25 +381,52 @@ class MaxEntRelationTagger():
         testFile.close()
         MaxEntValues = self.getMaxEntValues()
 
+
         # Find the most probable ARG1
-        arg1Pos = None
-        prob = None
+        # TODO: experiment if its better to use elif or regular ifs. with regular if statements the idea is that the same word can be guessed as two predicates. With elif the idea is that each token can only have at most one sysTag. Note: if choosing regular ifs we need to modify both if statemetns below (see TO DO2) AND scoring algorithm
+        arg0Pos = arg1Pos = arg2Pos = arg3Pos = None
+        arg0Prob = arg1Prob = arg2Prob = arg3Prob = None
         for key, value in MaxEntValues.iteritems():
-            # value = (NoneProb, ARG1Prob)
-            if value[1] > prob:
-                prob = value[1]
+            # value = (NoneProb, ARG1Prob, ARG0Prob, ARG2Prob, ARG3Prob)
+            if tokenList[key][5] in ['PRED', 'SUPPORT']:
+                continue
+            if arg1Prob < value[1] > 0:
+                arg1Prob = value[1]
                 arg1Pos = key
+            if arg0Prob < value[2] > 0:
+                arg0Prob = value[2]
+                arg0Pos = key
+            if arg2Prob < value[3] > 0:
+                arg2Prob = value[3]
+                arg2Pos = key
+            if arg3Prob < value[4] > 0:
+                arg3Prob = value[4]
+                arg3Pos = key
+
+        # TODO: figure out way to disambiguate between two competing tags
         for i in xrange(0, len(tokenList)):
-            if len(tokenList[i]) == 6:
-                (word, POS, BIO, wordNum, sentNum, keyTag) = tokenList[i]
-            else:
-                (word, POS, BIO, wordNum, sentNum, keyTag, keyClass) = tokenList[i]
-            keyTag = keyTag.replace('None', '')
-            if i == arg1Pos:
+            if 0 < len(tokenList[i]) < 7:
+                raise Exception('Error: Invalid token. Token: {0}'.format(tokenList[i]))
+            (word, POS, BIO, wordNum, sentNum, keyTag) = tokenList[i][:6]
+            #            if tokenList[i][6] != 'None':
+            #                keyClass = tokenList[i][6]
+            #            else:
+            #                keyClass = ''
+            keyClass = tokenList[i][6]
+            #keyTag = keyTag.replace('None', '')
+            if i == arg0Pos:
+                sysTag = 'ARG0'
+            elif i == arg1Pos:
                 sysTag = 'ARG1'
+            elif i == arg2Pos:
+                sysTag = 'ARG2'
+            elif i == arg3Pos:
+                sysTag = 'ARG3'
             else:
-                sysTag = ''
-            outFile.write('{0} {1} {2} {3} {4} {5} {6}\n'.format(word, POS, BIO, wordNum, sentNum, keyTag, sysTag))
+                sysTag = 'None'
+            outFile.write(
+                '{0:20}{1:20}{2:20}{3:20}{4:20}{5:20}{6:20}{7:20}\n'.format(word, POS, BIO, wordNum, sentNum, keyTag,
+                                                                            sysTag, keyClass))
 
 
     def getMaxEntValues(self):
@@ -400,10 +436,13 @@ class MaxEntRelationTagger():
         prediction = open(self.predictFileName)
         values = prediction.read().split()
         ret = {}
-        for i in xrange(0, len(values), 2):
-            var1 = values[i].split('[')
-            var2 = values[i + 1].split('[')
-            ret[i / 2] = (float(var1[1].split(']')[0]), float(var2[1].split(']')[0]))
+        if len(values) % 5:
+            raise Exception("{0} does not have 5 argument probabilities for MaxEnt".format(values))
+        for i in xrange(0, len(values), 5):
+            ret[i / 5] = []
+            for j in xrange(i, i + 5):
+                var = values[j].split('[')
+                ret[i / 5].append(float(var[1].split(']')[0]))
         return ret
 
 
@@ -413,7 +452,7 @@ def main():
         print('Usage: python2.6 hw7.py [devFileName] [outputFileName]')
         exit(1)
     MaxEntTagger = MaxEntRelationTagger(args[0], args[1])
-    #MaxEntTagger.TrainModel(100, 2)
+    MaxEntTagger.TrainModel(100, 2)
     MaxEntTagger.MaxEntTagFile()
 
 if __name__ == '__main__':

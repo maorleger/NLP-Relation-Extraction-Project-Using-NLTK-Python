@@ -1,0 +1,434 @@
+But	CC	O	0	0
+about	IN	B-NP	1	0
+25	CD	I-NP	2	0
+%	NN	I-NP	3	0	PRED	PARTITIVE-QUANT
+of	IN	B-PP	4	0
+the	DT	B-NP	5	0
+insiders	NNS	I-NP	6	0	ARG1
+COMMA	COMMA	O	7	0
+according	VBG	B-PP	8	0
+to	IN	B-PP	9	0
+SEC	NNP	B-NP	10	0
+figures	NNS	I-NP	11	0
+COMMA	COMMA	O	12	0
+file	VBP	O	13	0
+their	PRP$	B-NP	14	0
+reports	NNS	I-NP	15	0
+late	RB	B-ADVP	16	0
+.	.	O	17	0
+
+The	DT	B-NP	0	1
+bond	NN	I-NP	1	1
+fund	NN	I-NP	2	1
+will	MD	O	3	1
+invest	VB	O	4	1
+in	IN	B-PP	5	1
+high-grade	JJ	B-NP	6	1
+or	CC	I-NP	7	1
+medium-grade	JJ	I-NP	8	1
+bonds	NNS	I-NP	9	1
+COMMA	COMMA	O	10	1
+mortgages	NNS	B-NP	11	1
+or	CC	O	12	1
+asset-backed	JJ	B-NP	13	1
+securities	NNS	I-NP	14	1
+COMMA	COMMA	O	15	1
+including	VBG	O	16	1
+as	IN	O	17	1
+much	RB	B-ADVP	18	1
+as	IN	B-NP	19	1
+15	CD	I-NP	20	1
+%	NN	I-NP	21	1	PRED	PARTITIVE-QUANT
+in	IN	B-PP	22	1
+foreign	JJ	B-NP	23	1
+securities	NNS	I-NP	24	1	ARG1
+.	.	O	25	1
+
+The	DT	B-NP	0	2
+position	NN	I-NP	1	2
+of	IN	B-PP	2	2
+the	DT	B-NP	3	2
+United	NNP	B-NP	4	2
+States	NNPS	I-NP	5	2
+COMMA	COMMA	O	6	2
+which	WDT	B-NP	7	2
+once	RB	B-ADVP	8	2
+contributed	VBD	O	9	2
+25	CD	B-NP	10	2
+%	NN	I-NP	11	2	PRED	PARTITIVE-QUANT
+of	IN	B-PP	12	2
+the	DT	B-NP	13	2
+budget	NN	I-NP	14	2	ARG1
+COMMA	COMMA	O	15	2
+is	VBZ	O	16	2
+that	IN	B-SBAR	17	2
+nothing	NN	B-NP	18	2
+has	VBZ	O	19	2
+changed	VBN	O	20	2
+.	.	O	21	2
+
+The	DT	B-NP	0	3
+first	JJ	I-NP	1	3
+hybrid	JJ	I-NP	2	3
+corn	NN	I-NP	3	3
+seeds	NNS	I-NP	4	3
+produced	VBN	O	5	3
+using	VBG	O	6	3
+this	DT	B-NP	7	3
+mechanical	JJ	I-NP	8	3
+approach	NN	I-NP	9	3
+were	VBD	O	10	3
+introduced	VBN	O	11	3
+in	IN	B-PP	12	3
+the	DT	B-NP	13	3
+1930s	NNS	I-NP	14	3
+and	CC	B-CONJP	15	3
+they	PRP	B-NP	16	3
+yielded	VBD	O	17	3
+as	IN	B-NP	18	3
+much	JJ	I-NP	19	3
+as	IN	I-NP	20	3
+20	CD	I-NP	21	3
+%	NN	I-NP	22	3	PRED	PARTITIVE-QUANT
+more	JJR	B-NP	23	3	SUPPORT
+corn	NN	I-NP	24	3	ARG1
+than	IN	B-PP	25	3
+naturally	RB	B-ADVP	26	3
+pollinated	VBN	O	27	3
+plants	NNS	B-NP	28	3
+.	.	O	29	3
+
+Mr.	NNP	B-NP	0	4
+Leemans	NNP	I-NP	1	4
+said	VBD	O	2	4
+the	DT	B-NP	3	4
+hybrid	NN	I-NP	4	4
+rapeseeds	NNS	I-NP	5	4
+created	VBN	O	6	4
+with	IN	B-PP	7	4
+this	DT	B-NP	8	4
+genetic	JJ	I-NP	9	4
+engineering	NN	I-NP	10	4
+yield	VBD	O	11	4
+15	CD	B-NP	12	4
+%	NN	I-NP	13	4	PRED	PARTITIVE-QUANT
+to	TO	O	14	4
+30	CD	B-NP	15	4
+%	NN	I-NP	16	4
+more	JJR	B-NP	17	4	SUPPORT
+output	NN	I-NP	18	4	ARG1
+than	IN	B-PP	19	4
+the	DT	B-NP	20	4
+commercial	JJ	I-NP	21	4
+strains	NNS	I-NP	22	4
+used	VBN	O	23	4
+currently	RB	B-ADVP	24	4
+.	.	O	25	4
+
+Mr.	NNP	B-NP	0	5
+Leemans	NNP	I-NP	1	5
+said	VBD	O	2	5
+the	DT	B-NP	3	5
+hybrid	NN	I-NP	4	5
+rapeseeds	NNS	I-NP	5	5
+created	VBN	O	6	5
+with	IN	B-PP	7	5
+this	DT	B-NP	8	5
+genetic	JJ	I-NP	9	5
+engineering	NN	I-NP	10	5
+yield	VBD	O	11	5
+15	CD	B-NP	12	5
+%	NN	I-NP	13	5
+to	TO	O	14	5
+30	CD	B-NP	15	5
+%	NN	I-NP	16	5	PRED	PARTITIVE-QUANT
+more	JJR	B-NP	17	5	SUPPORT
+output	NN	I-NP	18	5	ARG1
+than	IN	B-PP	19	5
+the	DT	B-NP	20	5
+commercial	JJ	I-NP	21	5
+strains	NNS	I-NP	22	5
+used	VBN	O	23	5
+currently	RB	B-ADVP	24	5
+.	.	O	25	5
+
+Alltel	NNP	B-NP	0	6
+Corp.	NNP	I-NP	1	6
+said	VBD	O	2	6
+it	PRP	B-NP	3	6
+will	MD	O	4	6
+acquire	VB	O	5	6
+the	DT	B-NP	6	6
+55	CD	I-NP	7	6
+%	NN	I-NP	8	6	PRED	PARTITIVE-QUANT
+of	IN	B-PP	9	6
+Pond	NNP	B-NP	10	6
+Branch	NNP	I-NP	11	6
+Telephone	NNP	I-NP	12	6
+Company	NNP	I-NP	13	6
+Inc.	NNP	I-NP	14	6
+'s	POS	B-NP	15	6
+cellular	JJ	I-NP	16	6
+franchise	NN	I-NP	17	6	ARG1
+that	WDT	B-NP	18	6
+it	PRP	B-NP	19	6
+does	VBZ	O	20	6
+n't	RB	B-ADVP	21	6
+own	VB	O	22	6
+already	RB	B-ADVP	23	6
+.	.	O	24	6
+
+Alltel	NNP	B-NP	0	7
+holds	VBZ	O	1	7
+45	CD	B-NP	2	7
+%	NN	I-NP	3	7	PRED	PARTITIVE-QUANT
+of	IN	B-PP	4	7
+the	DT	B-NP	5	7
+franchise	NN	I-NP	6	7	ARG1
+COMMA	COMMA	O	7	7
+which	WDT	B-NP	8	7
+has	VBZ	O	9	7
+operations	NNS	B-NP	10	7
+in	IN	B-PP	11	7
+Aiken	NNP	B-NP	12	7
+COMMA	COMMA	O	13	7
+S.C.	NNP	B-NP	14	7
+COMMA	COMMA	O	15	7
+and	CC	O	16	7
+Augusta	NNP	B-NP	17	7
+COMMA	COMMA	O	18	7
+Ga	NNP	B-NP	19	7
+.	.	O	20	7
+
+Canada	NNP	B-NP	0	8
+'s	POS	B-NP	1	8
+gross	JJ	I-NP	2	8
+domestic	JJ	I-NP	3	8
+product	NN	I-NP	4	8	ARG1
+rose	VBD	O	5	8	SUPPORT
+an	DT	B-NP	6	8
+inflation-adjusted	VBN	O	7	8
+0.3	CD	B-NP	8	8
+%	NN	I-NP	9	8	PRED	PARTITIVE-QUANT
+in	IN	B-PP	10	8
+August	NNP	B-NP	11	8
+COMMA	COMMA	O	12	8
+mainly	RB	B-ADVP	13	8
+as	IN	B-SBAR	14	8
+a	DT	B-NP	15	8
+result	NN	I-NP	16	8
+of	IN	B-PP	17	8
+service-industry	NN	B-NP	18	8
+growth	NN	I-NP	19	8
+COMMA	COMMA	O	20	8
+Statistics	NNPS	B-NP	21	8
+Canada	NNP	I-NP	22	8
+COMMA	COMMA	O	23	8
+a	DT	B-NP	24	8
+federal	JJ	I-NP	25	8
+agency	NN	I-NP	26	8
+COMMA	COMMA	O	27	8
+said	VBD	O	28	8
+.	.	O	29	8
+
+At	IN	B-PP	0	2375
+its	PRP$	B-NP	1	2375
+November	NNP	I-NP	2	2375
+meeting	NN	I-NP	3	2375
+COMMA	COMMA	O	4	2375
+it	PRP	B-NP	5	2375
+will	MD	O	6	2375
+try	VB	O	7	2375
+to	TO	O	8	2375
+revise	VB	O	9	2375
+its	PRP$	B-NP	10	2375
+quotas	NNS	I-NP	11	2375
+to	TO	O	12	2375
+satisfy	VB	O	13	2375
+Persian	NNP	B-NP	14	2375
+Gulf	NNP	I-NP	15	2375
+members	NNS	B-NP	16	2375
+that	WDT	B-NP	17	2375
+can	MD	O	18	2375
+produce	VB	O	19	2375
+far	RB	B-ADVP	20	2375
+more	JJR	B-NP	21	2375
+oil	NN	I-NP	22	2375
+than	IN	B-PP	23	2375
+their	PRP$	B-NP	24	2375	ARG0
+allotments	NNS	I-NP	25	2375	PRED	SHARE
+.	.	O	26	2375
+
+His	PRP$	B-NP	0	2376	ARG0
+allotment	NN	I-NP	1	2376	PRED	SHARE
+of	IN	B-PP	2	2376
+materials	NNS	B-NP	3	2376	ARG1
+also	RB	O	4	2376
+did	VBD	O	5	2376
+COMMA	COMMA	O	6	2376
+until	IN	O	7	2376
+the	DT	B-NP	8	2376
+state	NN	I-NP	9	2376
+could	MD	O	10	2376
+n't	RB	B-ADVP	11	2376
+hold	VB	O	12	2376
+up	RP	B-ADVP	13	2376
+its	PRP$	O	14	2376
+end	NN	B-NP	15	2376
+of	IN	B-PP	16	2376
+that	DT	B-NP	17	2376
+bargain	NN	I-NP	18	2376
+.	.	O	19	2376
+
+They	PRP	B-NP	0	2377
+doled	VBD	O	1	2377
+it	PRP	B-NP	2	2377
+out	RP	B-ADVP	3	2377
+using	VBG	O	4	2377
+the	DT	O	5	2377
+existing	VBG	B-ADJP	6	2377
+formula	NN	B-NP	7	2377
+COMMA	COMMA	O	8	2377
+however	RB	O	9	2377
+COMMA	COMMA	O	10	2377
+which	WDT	B-NP	11	2377
+meant	VBD	O	12	2377
+that	IN	B-SBAR	13	2377
+even	RB	B-ADVP	14	2377
+those	DT	B-NP	15	2377
+countries	NNS	I-NP	16	2377	ARG0
+that	WDT	B-NP	17	2377
+could	MD	O	18	2377
+n't	RB	B-ADVP	19	2377
+produce	VB	O	20	2377
+more	DT	B-NP	21	2377
+received	VBD	O	22	2377	SUPPORT
+higher	JJR	B-NP	23	2377
+official	JJ	I-NP	24	2377
+allotments	NNS	I-NP	25	2377	PRED	SHARE
+.	.	O	26	2377
+That	DT	B-NP	0	2391
+'s	VBZ	O	1	2391
+because	IN	O	2	2391
+when	IN	O	3	2391
+Coke	NNP	B-NP	4	2391
+looks	VBZ	O	5	2391
+to	IN	B-PP	6	2391
+the	DT	B-NP	7	2391
+Pacific	NNP	I-NP	8	2391	ARG2
+area	NN	I-NP	9	2391	PRED	PARTITIVE-PART
+COMMA	COMMA	O	10	2391
+it	PRP	B-NP	11	2391
+sees	VBZ	O	12	2391
+an	DT	B-NP	13	2391
+economic	JJ	I-NP	14	2391
+and	CC	I-NP	15	2391
+demographic	JJ	I-NP	16	2391
+gold	NN	I-NP	17	2391
+mine	NN	I-NP	18	2391
+.	.	O	19	2391
+
+According	VBG	B-PP	0	2392
+to	IN	B-PP	1	2392
+senior	JJ	B-NP	2	2392
+consultants	NNS	I-NP	3	2392
+to	IN	B-PP	4	2392
+the	DT	B-NP	5	2392
+church	NN	I-NP	6	2392
+COMMA	COMMA	O	7	2392
+Mr.	NNP	B-NP	8	2392
+Moon	NNP	I-NP	9	2392
+has	VBZ	O	10	2392
+successfully	RB	B-ADVP	11	2392
+negotiated	VBN	O	12	2392
+a	DT	B-NP	13	2392
+joint	JJ	I-NP	14	2392
+venture	NN	I-NP	15	2392
+with	IN	B-PP	16	2392
+the	DT	B-NP	17	2392
+Chinese	JJ	I-NP	18	2392
+government	NN	I-NP	19	2392
+to	TO	O	20	2392
+build	VB	O	21	2392
+an	DT	B-NP	22	2392
+automobile-parts	NN	I-NP	23	2392
+plant	NN	I-NP	24	2392
+in	IN	B-PP	25	2392
+Guangdong	NNP	B-NP	26	2392
+Province	NNP	I-NP	27	2392
+COMMA	COMMA	O	28	2392
+an	DT	B-NP	29	2392
+area	NN	I-NP	30	2392	PRED	PARTITIVE-PART
+of	IN	B-PP	31	2392
+China	NNP	B-NP	32	2392	ARG1
+with	IN	B-PP	33	2392
+a	DT	B-NP	34	2392
+substantial	JJ	I-NP	35	2392
+Korean	JJ	I-NP	36	2392
+minority	NN	I-NP	37	2392
+.	.	O	38	2392
+
+It	PRP	B-NP	0	2454
+is	VBZ	O	1	2454
+an	DT	B-NP	2	2454
+independent	JJ	I-NP	3	2454
+phone	NN	I-NP	4	2454
+company	NN	I-NP	5	2454
+with	IN	B-PP	6	2454
+a	DT	B-NP	7	2454
+service	NN	I-NP	8	2454
+area	NN	I-NP	9	2454	PRED	PARTITIVE-QUANT
+of	IN	B-PP	10	2454
+15COMMA000	CD	B-NP	11	2454
+square	JJ	I-NP	12	2454
+miles	NNS	I-NP	13	2454	ARG1
+in	IN	B-PP	14	2454
+southwest	JJ	B-NP	15	2454
+New	NNP	B-NP	16	2454
+Mexico	NNP	I-NP	17	2454	ARG3
+.	.	O	18	2454
+
+Just	RB	B-ADVP	0	2455
+a	DT	B-NP	1	2455
+short	JJ	I-NP	2	2455
+span	NN	I-NP	3	2455
+across	IN	B-PP	4	2455
+the	DT	B-NP	5	2455
+bay	NN	I-NP	6	2455
+to	IN	B-PP	7	2455
+the	DT	B-NP	8	2455
+west	NN	I-NP	9	2455
+COMMA	COMMA	O	10	2455
+the	DT	B-NP	11	2455
+quake	NN	I-NP	12	2455
+also	RB	O	13	2455
+showed	VBD	O	14	2455
+its	PRP$	B-NP	15	2455
+mettle	NN	I-NP	16	2455
+:	:	O	17	2455
+A	DT	B-NP	18	2455
+four-square-block	NN	I-NP	19	2455	ARG1
+area	NN	I-NP	20	2455	PRED	PARTITIVE-QUANT
+of	IN	B-PP	21	2455
+the	DT	B-NP	22	2455
+Marina	NNP	B-NP	23	2455
+District	NNP	I-NP	24	2455	ARG3
+lies	VBZ	O	25	2455
+smoldering	VBG	O	26	2455
+under	IN	B-PP	27	2455
+a	DT	B-NP	28	2455
+steady	JJ	I-NP	29	2455
+stream	NN	I-NP	30	2455
+of	IN	B-PP	31	2455
+seawater	NN	B-NP	32	2455
+being	VBG	O	33	2455
+pumped	VBN	O	34	2455
+onto	IN	B-PP	35	2455
+rubble	NN	B-NP	36	2455
+to	TO	O	37	2455
+prevent	VB	O	38	2455
+it	PRP	B-NP	39	2455
+from	IN	B-PP	40	2455
+blazing	VBG	O	41	2455
+anew	RB	B-ADVP	42	2455
+.	.	O	43	2455
