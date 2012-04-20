@@ -47,325 +47,6 @@ Financial	NNP	I-NP	25	1
 Group	NNP	I-NP	26	1
 .	.	O	27	1
 
-The	DT	B-NP	0	2
-new	JJ	I-NP	1	2
-financing	NN	I-NP	2	2
-structure	NN	I-NP	3	2
-is	VBZ	O	4	2
-still	RB	B-ADVP	5	2
-a	DT	O	6	2
-very-highly	RB	B-ADVP	7	2
-leveraged	JJ	B-NP	8	2
-one	CD	I-NP	9	2
-COMMA	COMMA	O	10	2
-and	CC	B-CONJP	11	2
-Axa	NNP	B-NP	12	2
-still	RB	B-ADVP	13	2
-plans	VBZ	O	14	2
-to	TO	O	15	2
-take	VB	O	16	2
-out	RP	B-ADVP	17	2
-75	CD	B-NP	18	2
-%	NN	I-NP	19	2	PRED	PARTITIVE-QUANT
-of	IN	B-PP	20	2
-Farmers	NNPS	B-NP	21	2
-'	POS	B-NP	22	2
-earnings	NNS	I-NP	23	2	ARG1
-as	IN	B-SBAR	24	2
-dividends	NNS	B-NP	25	2
-to	TO	O	26	2
-service	VB	O	27	2
-their	PRP$	B-NP	28	2
-debt	NN	I-NP	29	2
-.	.	O	30	2
-''	''	O	31	2
-
-GM	NNP	B-NP	0	3
-'s	POS	B-NP	1	3
-domestic	JJ	I-NP	2	3
-car	NN	I-NP	3	3
-sales	NNS	I-NP	4	3
-dropped	VBD	O	5	3
-24.3	CD	B-NP	6	3
-%	NN	I-NP	7	3
-and	CC	B-CONJP	8	3
-its	PRP$	B-NP	9	3
-domestic	JJ	I-NP	10	3
-trucks	NNS	I-NP	11	3	ARG1
-were	VBD	O	12	3
-down	IN	B-PP	13	3
-an	DT	O	14	3
-even	RB	B-ADVP	15	3
-steeper	JJR	O	16	3
-28.7	CD	B-NP	17	3
-%	NN	I-NP	18	3	PRED	PARTITIVE-QUANT
-from	IN	B-PP	19	3
-the	DT	B-NP	20	3
-same	JJ	I-NP	21	3
-period	NN	I-NP	22	3
-a	DT	B-NP	23	3
-year	NN	I-NP	24	3
-ago	RB	B-ADVP	25	3
-.	.	O	26	3
-
-GM	NNP	B-NP	0	4
-'s	POS	B-NP	1	4
-domestic	JJ	I-NP	2	4
-car	NN	I-NP	3	4
-sales	NNS	I-NP	4	4	ARG1
-dropped	VBD	O	5	4	SUPPORT
-24.3	CD	B-NP	6	4
-%	NN	I-NP	7	4	PRED	PARTITIVE-QUANT
-and	CC	B-CONJP	8	4
-its	PRP$	B-NP	9	4
-domestic	JJ	I-NP	10	4
-trucks	NNS	I-NP	11	4
-were	VBD	O	12	4
-down	IN	B-PP	13	4
-an	DT	O	14	4
-even	RB	B-ADVP	15	4
-steeper	JJR	O	16	4
-28.7	CD	B-NP	17	4
-%	NN	I-NP	18	4
-from	IN	B-PP	19	4
-the	DT	B-NP	20	4
-same	JJ	I-NP	21	4
-period	NN	I-NP	22	4
-a	DT	B-NP	23	4
-year	NN	I-NP	24	4
-ago	RB	B-ADVP	25	4
-.	.	O	26	4
-
-Cadillac	NNP	B-NP	0	5	ARG1
-posted	VBD	O	1	5	SUPPORT
-a	DT	O	2	5
-3.2	CD	B-NP	3	5
-%	NN	I-NP	4	5	PRED	PARTITIVE-QUANT
-increase	NN	B-NP	5	5	SUPPORT
-despite	IN	B-PP	6	5
-new	JJ	B-NP	7	5
-competition	NN	I-NP	8	5
-from	IN	B-PP	9	5
-Lexus	NNP	B-NP	10	5
-COMMA	COMMA	O	11	5
-the	DT	O	12	5
-fledging	VBG	B-ADJP	13	5
-luxury-car	NN	B-NP	14	5
-division	NN	I-NP	15	5
-of	IN	B-PP	16	5
-Toyota	NNP	B-NP	17	5
-Motor	NNP	I-NP	18	5
-Corp	NNP	I-NP	19	5
-.	.	O	20	5
-
-Ford	NNP	B-NP	0	6
-Motor	NNP	I-NP	1	6
-Co.	NNP	I-NP	2	6
-had	VBD	O	3	6
-a	DT	O	4	6
-1.8	CD	B-NP	5	6
-%	NN	I-NP	6	6
-drop	NN	B-NP	7	6
-in	IN	B-PP	8	6
-domestic	JJ	B-NP	9	6
-car	NN	I-NP	10	6
-sales	NNS	I-NP	11	6
-but	CC	O	12	6
-a	DT	O	13	6
-2.4	CD	B-NP	14	6
-%	NN	I-NP	15	6	PRED	PARTITIVE-QUANT
-increase	NN	B-NP	16	6	SUPPORT
-in	IN	B-PP	17	6
-domestic	JJ	B-NP	18	6
-truck	NN	I-NP	19	6
-sales	NNS	I-NP	20	6	ARG1
-.	.	O	21	6
-
-Ford	NNP	B-NP	0	7
-Motor	NNP	I-NP	1	7
-Co.	NNP	I-NP	2	7
-had	VBD	O	3	7
-a	DT	O	4	7
-1.8	CD	B-NP	5	7
-%	NN	I-NP	6	7	PRED	PARTITIVE-QUANT
-drop	NN	B-NP	7	7	SUPPORT
-in	IN	B-PP	8	7
-domestic	JJ	B-NP	9	7
-car	NN	I-NP	10	7
-sales	NNS	I-NP	11	7	ARG1
-but	CC	O	12	7
-a	DT	O	13	7
-2.4	CD	B-NP	14	7
-%	NN	I-NP	15	7
-increase	NN	B-NP	16	7
-in	IN	B-PP	17	7
-domestic	JJ	B-NP	18	7
-truck	NN	I-NP	19	7
-sales	NNS	I-NP	20	7
-.	.	O	21	7
-
-Chrysler	NNP	B-NP	0	8
-Corp.	NNP	I-NP	1	8
-had	VBD	O	2	8
-a	DT	O	3	8
-7.5	CD	B-NP	4	8
-%	NN	I-NP	5	8	PRED	PARTITIVE-QUANT
-drop	NN	B-NP	6	8	SUPPORT
-in	IN	B-PP	7	8
-car	NN	B-NP	8	8
-sales	NNS	I-NP	9	8	ARG1
-COMMA	COMMA	O	10	8
-echoing	VBG	O	11	8
-its	PRP$	O	12	8
-generally	RB	B-ADVP	13	8
-slow	JJ	B-NP	14	8
-performance	NN	I-NP	15	8
-all	DT	B-NP	16	8
-year	NN	I-NP	17	8
-.	.	O	18	8
-
-However	RB	O	0	9
-COMMA	COMMA	O	1	9
-sales	NNS	B-NP	2	9	ARG1
-of	IN	B-PP	3	9
-trucks	NNS	B-NP	4	9
-COMMA	COMMA	O	5	9
-including	VBG	O	6	9
-the	DT	B-NP	7	9
-company	NN	I-NP	8	9
-'s	POS	B-NP	9	9
-popular	JJ	I-NP	10	9
-minivans	NNS	I-NP	11	9
-COMMA	COMMA	O	12	9
-rose	VBD	O	13	9	SUPPORT
-4.3	CD	B-NP	14	9
-%	NN	I-NP	15	9	PRED	PARTITIVE-QUANT
-.	.	O	16	9
-
-Honda	NNP	B-NP	0	10
-Motor	NNP	I-NP	1	10
-Co.	NNP	I-NP	2	10
-'s	POS	B-NP	3	10
-sales	NNS	I-NP	4	10	ARG1
-of	IN	B-PP	5	10
-domestically	RB	B-ADVP	6	10
-built	VBN	O	7	10
-vehicles	NNS	B-NP	8	10
-plunged	VBD	O	9	10	SUPPORT
-21.7	CD	B-NP	10	10
-%	NN	I-NP	11	10	PRED	PARTITIVE-QUANT
-from	IN	B-PP	12	10
-a	DT	B-NP	13	10
-year	NN	I-NP	14	10
-earlier	RBR	B-ADVP	15	10
-.	.	O	16	10
-
-Separately	RB	O	0	11
-COMMA	COMMA	O	1	11
-Chrysler	NNP	B-NP	2	11
-said	VBD	O	3	11
-firm	JJ	B-NP	4	11
-prices	NNS	I-NP	5	11	ARG1
-on	IN	B-PP	6	11
-its	PRP$	B-NP	7	11
-1990-model	NN	I-NP	8	11
-domestic	JJ	I-NP	9	11
-cars	NNS	I-NP	10	11
-and	CC	I-NP	11	11
-minivans	NNS	I-NP	12	11
-will	MD	O	13	11
-rise	VB	O	14	11	SUPPORT
-an	DT	B-NP	15	11
-average	NN	I-NP	16	11	SUPPORT
-of	IN	B-PP	17	11	SUPPORT
-5	CD	B-NP	18	11
-%	NN	I-NP	19	11	PRED	PARTITIVE-QUANT
-over	IN	B-PP	20	11
-comparably	RB	B-ADVP	21	11
-equipped	VBN	O	22	11
-1989	CD	B-NP	23	11
-models	NNS	I-NP	24	11
-.	.	O	25	11
-
-Domestically	RB	B-ADVP	0	12
-built	VBN	O	1	12
-truck	NN	B-NP	2	12
-sales	NNS	I-NP	3	12	ARG1
-were	VBD	O	4	12
-down	IN	B-PP	5	12
-10.4	CD	B-NP	6	12
-%	NN	I-NP	7	12	PRED	PARTITIVE-QUANT
-to	IN	B-PP	8	12
-86COMMA555	CD	B-NP	9	12
-pickups	NNS	I-NP	10	12
-COMMA	COMMA	I-NP	11	12
-vans	NNS	I-NP	12	12
-and	CC	I-NP	13	12
-sport	NN	I-NP	14	12
-utility	NN	I-NP	15	12
-vehicles	NNS	I-NP	16	12
-.	.	O	17	12
-
-At	IN	B-PP	0	13
-that	DT	B-NP	1	13
-time	NN	I-NP	2	13
-COMMA	COMMA	O	3	13
-Chrysler	NNP	B-NP	4	13
-said	VBD	O	5	13
-base	NN	B-NP	6	13
-prices	NNS	I-NP	7	13	ARG1
-COMMA	COMMA	O	8	13
-which	WDT	B-NP	9	13
-are	VBP	O	10	13
-n't	RB	B-ADVP	11	13
-adjusted	VBN	O	12	13
-for	IN	B-PP	13	13
-equipment	NN	B-NP	14	13
-changes	NNS	I-NP	15	13
-COMMA	COMMA	O	16	13
-would	MD	O	17	13
-rise	VB	O	18	13	SUPPORT
-between	IN	B-NP	19	13
-4	CD	I-NP	20	13
-%	NN	I-NP	21	13	PRED	PARTITIVE-QUANT
-and	CC	I-NP	22	13
-9	CD	I-NP	23	13
-%	NN	I-NP	24	13
-on	IN	B-PP	25	13
-most	JJS	B-NP	26	13
-vehicle	NN	I-NP	27	13
-.	.	O	28	13
-
-At	IN	B-PP	0	14
-that	DT	B-NP	1	14
-time	NN	I-NP	2	14
-COMMA	COMMA	O	3	14
-Chrysler	NNP	B-NP	4	14
-said	VBD	O	5	14
-base	NN	B-NP	6	14
-prices	NNS	I-NP	7	14	ARG1
-COMMA	COMMA	O	8	14
-which	WDT	B-NP	9	14
-are	VBP	O	10	14
-n't	RB	B-ADVP	11	14
-adjusted	VBN	O	12	14
-for	IN	B-PP	13	14
-equipment	NN	B-NP	14	14
-changes	NNS	I-NP	15	14
-COMMA	COMMA	O	16	14
-would	MD	O	17	14
-rise	VB	O	18	14	SUPPORT
-between	IN	B-NP	19	14
-4	CD	I-NP	20	14
-%	NN	I-NP	21	14
-and	CC	I-NP	22	14
-9	CD	I-NP	23	14
-%	NN	I-NP	24	14	PRED	PARTITIVE-QUANT
-on	IN	B-PP	25	14
-most	JJS	B-NP	26	14
-vehicle	NN	I-NP	27	14
-.	.	O	28	14
-
 Paying	VBG	O	0	87	ARG0
 COMMA	COMMA	O	1	87
 say	VB	O	2	87
@@ -386,31 +67,134 @@ the	DT	B-NP	16	87
 return	NN	I-NP	17	87
 .	.	O	18	87
 
-Mexican	JJ	B-NP	0	88
-investor	NN	I-NP	1	88
-Joel	NNP	B-NP	2	88
-Rocha	NNP	I-NP	3	88
-Garza	NNP	I-NP	4	88
-said	VBD	O	5	88
-he	PRP	B-NP	6	88
-sold	VBD	O	7	88
-a	DT	B-NP	8	88
-block	NN	I-NP	9	88	PRED	PARTITIVE-QUANT
-of	IN	B-PP	10	88
-600COMMA000	CD	B-NP	11	88
-shares	NNS	I-NP	12	88	ARG1
-of	IN	B-PP	13	88
-Smith	NNP	B-NP	14	88
-Laboratories	NNPS	I-NP	15	88
-Inc.	NNP	I-NP	16	88
-common	JJ	B-ADJP	17	88
-stock	NN	B-NP	18	88
-to	IN	B-PP	19	88
-companies	NNS	B-NP	20	88
-affiliated	VBN	O	21	88
-with	IN	B-PP	22	88
-him	PRP	B-NP	23	88
-.	.	O	24	88
+But	CC	B-CONJP	0	105
+such	DT	B-NP	1	105
+convolutions	NNS	I-NP	2	105
+would	MD	O	3	105
+still	RB	B-ADVP	4	105
+block	VB	O	5	105
+the	DT	B-NP	6	105
+networks	NNS	I-NP	7	105	ARG0
+from	IN	B-PP	8	105
+grabbing	VBG	O	9	105	SUPPORT
+a	DT	B-NP	10	105
+big	JJ	I-NP	11	105	ARG2
+chunk	NN	I-NP	12	105	PRED	SHARE/PARTITIVE-PART
+of	IN	B-PP	13	105
+the	DT	B-NP	14	105
+riches	NN	I-NP	15	105	ARG1
+of	IN	B-PP	16	105
+syndication	NN	B-NP	17	105
+.	.	O	18	105
+
+John	NNP	B-NP	0	106
+Snyder	NNP	I-NP	1	106
+COMMA	COMMA	O	2	106
+former	JJ	B-NP	3	106
+president	NN	I-NP	4	106
+of	IN	B-PP	5	106
+the	DT	O	6	106
+Los	NNP	B-NP	7	106
+Angeles	NNP	I-NP	8	106
+chapter	NN	B-NP	9	106
+of	IN	B-PP	10	106
+the	DT	B-NP	11	106
+National	NNP	B-NP	12	106
+Association	NNP	I-NP	13	106
+of	IN	B-PP	14	106
+Investors	NNPS	B-NP	15	106
+Corp.	NNP	I-NP	16	106
+COMMA	COMMA	O	17	106
+an	DT	B-NP	18	106
+organization	NN	I-NP	19	106
+of	IN	B-PP	20	106
+investment	NN	B-NP	21	106	ARG1
+clubs	NNS	I-NP	22	106	PRED	GROUP
+and	CC	O	23	106
+individual	JJ	B-NP	24	106
+investors	NNS	I-NP	25	106
+COMMA	COMMA	O	26	106
+says	VBZ	O	27	106
+his	PRP$	B-NP	28	106
+fellow	NN	I-NP	29	106
+club	NN	I-NP	30	106
+members	NNS	I-NP	31	106
+did	VBD	O	32	106
+n't	RB	B-ADVP	33	106
+sell	VB	O	34	106
+in	IN	B-PP	35	106
+the	DT	B-NP	36	106
+crash	NN	I-NP	37	106
+of	IN	B-PP	38	106
+1987	CD	B-NP	39	106
+COMMA	COMMA	O	40	106
+and	CC	B-CONJP	41	106
+see	VB	O	42	106
+no	DT	B-NP	43	106
+reason	NN	I-NP	44	106
+to	TO	O	45	106
+sell	VB	O	46	106
+now	RB	B-ADVP	47	106
+.	.	O	48	106
+
+The	DT	B-NP	0	110
+investment	NN	I-NP	1	110
+bank	NN	I-NP	2	110
+becomes	VBZ	O	3	110
+majority	NN	B-NP	4	110
+shareholder	NN	I-NP	5	110
+in	IN	B-PP	6	110
+Sports	NNPS	B-NP	7	110
+&	NNP	I-NP	8	110
+Recreation	NNP	I-NP	9	110
+COMMA	COMMA	O	10	110
+a	DT	B-NP	11	110
+10-year-old	JJ	I-NP	12	110
+sporting	NN	I-NP	13	110
+goods	NNS	I-NP	14	110
+retailer	NN	I-NP	15	110
+COMMA	COMMA	O	16	110
+said	VBD	O	17	110
+Oliver	NNP	B-NP	18	110
+E.	NNP	I-NP	19	110
+Richardson	NNP	I-NP	20	110
+COMMA	COMMA	O	21	110
+a	DT	B-NP	22	110
+member	NN	I-NP	23	110
+of	IN	B-PP	24	110
+Investcorp	NNP	B-NP	25	110	ARG2
+'s	POS	B-NP	26	110
+management	NN	I-NP	27	110	ARG1
+committee	NN	I-NP	28	110	PRED	GROUP
+and	CC	O	29	110
+a	DT	B-NP	30	110
+director	NN	I-NP	31	110
+of	IN	B-PP	32	110
+the	DT	B-NP	33	110
+chain	NN	I-NP	34	110
+.	.	O	35	110
+
+Cadillac	NNP	B-NP	0	121
+posted	VBD	O	1	121
+a	DT	O	2	121
+3.2	CD	B-NP	3	121
+%	NN	I-NP	4	121
+increase	NN	B-NP	5	121
+despite	IN	B-PP	6	121
+new	JJ	B-NP	7	121
+competition	NN	I-NP	8	121
+from	IN	B-PP	9	121
+Lexus	NNP	B-NP	10	121
+COMMA	COMMA	O	11	121
+the	DT	O	12	121
+fledging	VBG	B-ADJP	13	121
+luxury-car	NN	B-NP	14	121	ARG2
+division	NN	I-NP	15	121	PRED	PARTITIVE-PART
+of	IN	B-PP	16	121
+Toyota	NNP	B-NP	17	121
+Motor	NNP	I-NP	18	121	ARG1
+Corp	NNP	I-NP	19	121
+.	.	O	20	121
 
 President	NNP	B-NP	0	158
 F.W.	NNP	I-NP	1	158

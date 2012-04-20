@@ -57,6 +57,8 @@ def score(sysOutFile, keyOutFile):
     correct = 0
     key = 0
     system = 0
+    falseTag = 0
+    missedTag = 0
     sysOut = sysOutFile.readlines()
     keyOut = keyOutFile.readlines()
     if len(sysOut) <> len(keyOut):
@@ -67,14 +69,21 @@ def score(sysOutFile, keyOutFile):
         if sysTup and keyTup:
             sentNum = sysTup[4]
         if len(keyTup) > 5 and keyTup[5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
+            # key found
             key += 1
         if len(sysTup) > 6 and sysTup[6] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
+            # system found
             system += 1
             if sysTup[6] == sysTup[5]:
+                # one correct
                 correct += 1
         elif len(sysTup) == 6 and sysTup[5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
+            # incorrect
             if len(keyTup) < 6 or keyTup[5] not in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
                 system += 1
+                falseTag += 1
+            else:
+                missedTag += 1
     correct = float(correct)
     system = float(system)
     key = float(key)
@@ -92,6 +101,7 @@ def score(sysOutFile, keyOutFile):
     print('Number of sentences = {0}\t Number of tokens = {1}\n'.format(int(sentNum) + 1,
                                                                         len([item for item in sysOut if item])))
     print('correct = {0}\tsystem = {1}\tkey = {2}\n'.format(correct, system, key))
+    print('false tags = {0}\tmissed tags = {1}\n'.format(falseTag, missedTag))
     print('Precision = {0}\tRecall = {1}\tF-Score = {2}\n'.format(precision, recall, fscore))
 
 

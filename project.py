@@ -40,6 +40,7 @@ LICENSE
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
+
 __author__ = 'Maor Leger'
 
 import sys, os, traceback, optparse
@@ -117,6 +118,11 @@ import subprocess as sub
 #        - Ex: California/ARG2 's assembly/PRED
 #This list is NOT exhaustive!
 #Sometimes idiosyncratic properties of particular words cause there to be additional argument types.
+# From slides:
+# ARG1: PARTITIVE-QUANT, GROUP, SHARE, PARTITIVE-PART
+# ARG0: SHARE
+# ARG2: SHARE, GROUP
+# ARG3: Secondary theme ~~ ARG1
 #
 #
 #Special labels: PRED and SUPPORT
@@ -152,6 +158,14 @@ import subprocess as sub
 
 
 
+def isClassName(ARGiClasses, className):
+    x = 5
+    for ARGiClass in ARGiClasses:
+        if ARGiClass in className:
+            return True
+    return False
+
+
 class MaxEntRelationTagger():
     """The MaxEntRelationTagger class - contains everything needed to run a MaxEntRelationTagger tagger"""
 
@@ -164,6 +178,9 @@ class MaxEntRelationTagger():
             self.trainingFileName = 'training'
         self.devFileName, self.outFileName = devFileName, outFileName
         self.modelFileName, self.predictFileName, self.testFileName = 'featuresModel.txt', 'features.predictions', 'features.test'
+        self.ARG0Classes = ['SHARE']
+        self.ARG2Classes = ['SHARE', 'GROUP']
+        self.ignoredClasses = ['PRED', 'SUPPORT']
 
     def readFile(self, fileName):
         """Reads a file and returns a list containing all the lines in the file"""
@@ -376,6 +393,20 @@ class MaxEntRelationTagger():
 
     def MaxEntTagSentence(self, tokenList, outFile):
         """Finds the most probable ARG1 for a sentence and outputs the input with the system choice for ARG1"""
+        li = [item[5] for item in tokenList]
+        if not li.count('PRED'):
+            for item in tokenList:
+                (word, POS, BIO, wordNum, sentNum, keyTag) = item[:6]
+                keyTag = keyTag.replace('None', '')
+                outFile.write(
+                    '{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\n'.format(word, POS, BIO, wordNum, sentNum, keyTag))
+            return
+
+        predPos = li.index('PRED')
+        className = tokenList[predPos][6]
+        if className == 'None':
+            raise RuntimeError("Error: the token {0} has a PRED but no class name".format(tokenList[predPos]))
+
         testFile = open(self.testFileName, 'w')
         self.writeAllWordFeatures(tokenList, testFile)
         testFile.close()
@@ -388,15 +419,15 @@ class MaxEntRelationTagger():
         arg0Prob = arg1Prob = arg2Prob = arg3Prob = None
         for key, value in MaxEntValues.iteritems():
             # value = (NoneProb, ARG1Prob, ARG0Prob, ARG2Prob, ARG3Prob)
-            if tokenList[key][5] in ['PRED', 'SUPPORT']:
+            if tokenList[key][5] in self.ignoredClasses:
                 continue
             if arg1Prob < value[1] > 0:
                 arg1Prob = value[1]
                 arg1Pos = key
-            if arg0Prob < value[2] > 0:
+            if arg0Prob < value[2] > 0 and isClassName(self.ARG0Classes, className):
                 arg0Prob = value[2]
                 arg0Pos = key
-            if arg2Prob < value[3] > 0:
+            if arg2Prob < value[3] > 0 and isClassName(self.ARG2Classes, className):
                 arg2Prob = value[3]
                 arg2Pos = key
             if arg3Prob < value[4] > 0:
@@ -408,10 +439,6 @@ class MaxEntRelationTagger():
             if 0 < len(tokenList[i]) < 7:
                 raise Exception('Error: Invalid token. Token: {0}'.format(tokenList[i]))
             (word, POS, BIO, wordNum, sentNum, keyTag) = tokenList[i][:6]
-            #if tokenList[i][6] != 'None':
-            #    keyClass = tokenList[i][6]
-            #else:
-            #    keyClass = ''
             keyClass = tokenList[i][6].replace('None', '')
             keyTag = keyTag.replace('None', '')
             if i == arg0Pos:
@@ -425,9 +452,9 @@ class MaxEntRelationTagger():
             else:
                 sysTag = ''
             outFile.write(
-                '{0}\t\t{1}\t\t{2}\t\t{3}\t\t{4}\t\t{5}\t\t{6}\t\t{7}\n'.format(word, POS, BIO, wordNum, sentNum, keyTag
-                                                                                ,
-                                                                                sysTag, keyClass))
+                '{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\n'.format(word, POS, BIO, wordNum, sentNum, keyTag
+                                                                  ,
+                                                                  sysTag, keyClass))
 
 
     def getMaxEntValues(self):
