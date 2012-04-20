@@ -430,15 +430,15 @@ class MaxEntRelationTagger():
 
 
 
-            #        for line in lines:
-            #            if not line:
-            #                print ('tagging sentence: {0}'.format(' '.join([tokenList[i][0] for i in xrange(0, len(tokenList))])))
-            #                self.MaxEntTagSentence(tokenList, outFile)
-            #                tokenList = []
-            #                outFile.write('\n')
-            #                className = 'None'
-            #            else:
-            #                tokenList.append(line)
+                #        for line in lines:
+                #            if not line:
+                #                print ('tagging sentence: {0}'.format(' '.join([tokenList[i][0] for i in xrange(0, len(tokenList))])))
+                #                self.MaxEntTagSentence(tokenList, outFile)
+                #                tokenList = []
+                #                outFile.write('\n')
+                #                className = 'None'
+                #            else:
+                #                tokenList.append(line)
 
         if len(tokenList) > 0:
             print ('tagging sentence: {0}'.format(' '.join([tokenList[i][0] for i in xrange(0, len(tokenList))])))
@@ -527,26 +527,6 @@ class MaxEntRelationTagger():
                 var2 = float(var1[1].split(']')[0])
                 retVal[var1[0]] = var2
             yield retVal
-
-
-
-            #values = prediction.read().split()
-
-#        ret = {}
-#        for i in xrange(0, len(values)):
-#            ret[i] = []
-#            tmp = values[i].split()
-#            for j in xrange(0, len(tmp)):
-#                var = tmp[j].split('[')
-#                ret[i].append(float(var[1].split(']')[0]))
-#        if len(values) % 5:
-#            raise Exception("{0} does not have 5 argument probabilities for MaxEnt".format(values))
-#        for i in xrange(0, len(values), 5):
-#            ret[i / 5] = []
-#            for j in xrange(i, i + 5):
-#                var = values[j].split('[')
-#                ret[i / 5].append(float(var[1].split(']')[0]))
-#        return ret
 
 
 def main():
