@@ -47,11 +47,6 @@ import sys, os, traceback, optparse
 import time
 
 
-# correct values:
-# Key = 420
-# system as of 4/14 = 894
-# correct as of 4/14 = 197
-
 #noinspection PyUnboundLocalVariable
 def score(sysOutFile, keyOutFile):
     correct = 0

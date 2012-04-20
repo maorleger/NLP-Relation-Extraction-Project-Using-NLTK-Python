@@ -47,6 +47,7 @@ import sys, os, traceback, optparse
 import time
 import re
 import subprocess as sub
+import cPickle as pickle
 #
 #Some specs:
 #first six columns are same as hw7.
@@ -177,7 +178,6 @@ class MaxEntRelationTagger():
         else:
             self.trainingFileName = 'training'
         self.devFileName, self.outFileName = devFileName, outFileName
-        self.modelFileName, self.predictFileName, self.testFileName = 'featuresModel.txt', 'features.predictions', 'features.test'
         self.ARG0Classes = ['SHARE']
         self.ARG2Classes = ['SHARE', 'GROUP']
         self.ignoredClasses = ['PRED', 'SUPPORT']
@@ -191,31 +191,68 @@ class MaxEntRelationTagger():
         return inputFile.readlines()
 
 
+    def fixFileName(self, fileName):
+        return re.sub(r'[/]', '_', fileName)
+
+    def featureFileName(self, fileName):
+        return self.fixFileName(fileName) + '.dat'
+
+    def testFileName(self, fileName):
+        return self.fixFileName(fileName) + '.test'
+
+    def modelFileName(self, fileName):
+        return self.fixFileName(fileName) + 'Model.txt'
+
+    def predictFileName(self, fileName):
+        return self.fixFileName(fileName) + '.predictions'
+
+
     def TrainModel(self, numIterations, featureCutOff):
         """Trains the MaxEnt Model using Ang's MaxEnt wrapper"""
         print('Training model...\n')
         numIterations = str(numIterations)
         featureCutOff = str(featureCutOff)
-        raw = self.readFile(self.trainingFileName)
-        self.taggedList = self.getTaggedList(raw)
+        # TODO: REMOVE THIS BEFORE SUBMITTING!!!!!!!!
+        try:
+            self.taggedList = pickle.load(open("taggedList.pickle"))
+            print('PICKLE successfully loaded')
+        except IOError as e:
+            print('Couldnt load PICKLE')
+            raw = self.readFile(self.trainingFileName)
+            self.taggedList = self.getTaggedList(raw)
+            #self.taggedList = self.getTaggedList(raw)
+        classNames = set([item[6] for item in self.taggedList if len(item) > 5 and item[5] == 'PRED'])
+        openFiles = {}
+        for item in classNames:
+            openFiles[item] = open(self.featureFileName(item), 'w')
         oneSent = []
-        dataFile = open(self.featuresFileName, 'w')
+        #dataFile = open(self.featuresFileName, 'w')
         totalSents = 10263
         i = 0
+        className = 'None'
         for item in self.taggedList:
             if item:
                 oneSent.append(item)
+                if item[5] == 'PRED':
+                    className = item[6]
+                    dataFile = openFiles[className]
             else:
                 i += 1
                 print('i={0} %completed={1}'.format(i, float(i) / totalSents))
-                self.writeAllWordFeatures(oneSent, dataFile, True, True)
+                if className != 'None':
+                    self.writeAllWordFeatures(oneSent, openFiles[className], True, True)
                 oneSent = []
-        dataFile.close()
-        print(
-            'Running java -jar -Xmx1024m MaxEntCreatModel.jar {0} {1} {2}'.format(self.featuresFileName, numIterations,
-                                                                                  featureCutOff))
-        sub.call(
-            ["java", "-jar", "-Xmx1024m", "MaxEntCreatModel.jar", self.featuresFileName, numIterations, featureCutOff])
+                className = 'None'
+        for fileName, openFile in openFiles.iteritems():
+            openFile.close()
+            print(
+                'Running java -jar -Xmx1024m MaxEntCreatModel.jar {0} {1} {2}'.format(self.featureFileName(fileName),
+                                                                                      numIterations,
+                                                                                      featureCutOff))
+            sub.call(
+                ["java", "-jar", "-Xmx1024m", "MaxEntCreatModel.jar", self.featureFileName(fileName), numIterations,
+                 featureCutOff], stdout = sub.PIPE)
+
         print('Done training...\n')
 
 
@@ -232,6 +269,9 @@ class MaxEntRelationTagger():
             if len(l) == 6:
                 l.append('None')
             taggedList.append(tuple(l))
+        pickleFile = open("taggedList.pickle", "w")
+        pickle.dump(taggedList, pickleFile)
+        pickleFile.close()
         return taggedList
 
     def getFeatures(self, firstItemIndex, secondItemIndex, spList):
@@ -318,8 +358,7 @@ class MaxEntRelationTagger():
         """
 
         # Only consider negative samples if the POS is in negPOSSampleList
-        #negPOSSampleList = ['NN', 'NNS', 'NNP', 'JJ', 'PRP', 'CD', 'DT', 'NNPS', 'VBG', 'FW', 'IN', 'RB', 'VBZ', 'WDT',
-        #                    'WP']
+
         negPOSSampleList = ['NN', 'NNS', 'NNP', 'VBD', 'PRP$', 'JJ', 'IN', 'VB', 'VBN', 'VBG', 'VBZ', 'CD', 'PRP',
                             'NNPS', 'VBP', 'DT', 'JJR', 'WP$', 'WP', 'RBR', 'RB', 'JJS', 'WDT', 'TO', '$', 'WRB', '``']
         for i in xrange(0, len(sent)):
@@ -357,10 +396,10 @@ class MaxEntRelationTagger():
                      key != 'output' and value != '']), featuresDict['output']))
 
 
-    def GetPredictions(self):
+    def GetPredictions(self, test, model, predict):
         """Calls Ang's wrapper to get predictions"""
-        sub.call(["java", "-jar", "-Xmx512m", "MaxEntPredict.jar", self.testFileName, self.modelFileName,
-                  self.predictFileName], stdout = sub.PIPE)
+        sub.call(["java", "-jar", "-Xmx512m", "MaxEntPredict.jar", test, model,
+                  predict], stdout = sub.PIPE)
 
     def MaxEntTagFile(self):
         """Tags an entire file by calling TagSentence on each sentence"""
@@ -368,30 +407,46 @@ class MaxEntRelationTagger():
         outFile = open(self.outFileName, 'w')
         tokenList = []
         lines = []
+        className = 'None'
         for line in raw:
             line = line.strip().split()
-            if len(line) == 5:
-                line.append('None')
-            if len(line) == 6:
-                line.append('None')
-            if 5 > len(line) > 0:
-                raise Exception
-            lines.append(tuple(line))
-        for line in lines:
             if not line:
                 print ('tagging sentence: {0}'.format(' '.join([tokenList[i][0] for i in xrange(0, len(tokenList))])))
-                self.MaxEntTagSentence(tokenList, outFile)
+                self.MaxEntTagSentence(tokenList, className, outFile)
                 tokenList = []
                 outFile.write('\n')
+                className = 'None'
             else:
-                tokenList.append(line)
+                # guarantee that each token in tokenList has 7 items exactly.
+                if len(line) == 5:
+                    line.append('None')
+                if len(line) == 6:
+                    line.append('None')
+                if 7 > len(line) > 0:
+                    raise Exception("Something went wrong... line: {0}".format(line))
+                if line[5] == 'PRED':
+                    className = line[6]
+                tokenList.append(tuple(line))
+
+
+
+            #        for line in lines:
+            #            if not line:
+            #                print ('tagging sentence: {0}'.format(' '.join([tokenList[i][0] for i in xrange(0, len(tokenList))])))
+            #                self.MaxEntTagSentence(tokenList, outFile)
+            #                tokenList = []
+            #                outFile.write('\n')
+            #                className = 'None'
+            #            else:
+            #                tokenList.append(line)
+
         if len(tokenList) > 0:
             print ('tagging sentence: {0}'.format(' '.join([tokenList[i][0] for i in xrange(0, len(tokenList))])))
             self.MaxEntTagSentence(tokenList, outFile)
         outFile.close()
 
 
-    def MaxEntTagSentence(self, tokenList, outFile):
+    def MaxEntTagSentence(self, tokenList, className, outFile):
         """Finds the most probable ARG1 for a sentence and outputs the input with the system choice for ARG1"""
         li = [item[5] for item in tokenList]
         if not li.count('PRED'):
@@ -402,37 +457,37 @@ class MaxEntRelationTagger():
                     '{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\n'.format(word, POS, BIO, wordNum, sentNum, keyTag))
             return
 
-        predPos = li.index('PRED')
-        className = tokenList[predPos][6]
-        if className == 'None':
-            raise RuntimeError("Error: the token {0} has a PRED but no class name".format(tokenList[predPos]))
-
-        testFile = open(self.testFileName, 'w')
+        testFile = open(self.testFileName(className), 'w')
         self.writeAllWordFeatures(tokenList, testFile)
         testFile.close()
-        MaxEntValues = self.getMaxEntValues()
+        #MaxEntValues = self.getMaxEntValues(className)
+
+
 
 
         # Find the most probable ARG1
         # TODO: experiment if its better to use elif or regular ifs. with regular if statements the idea is that the same word can be guessed as two predicates. With elif the idea is that each token can only have at most one sysTag. Note: if choosing regular ifs we need to modify both if statemetns below (see TO DO2) AND scoring algorithm
         arg0Pos = arg1Pos = arg2Pos = arg3Pos = None
         arg0Prob = arg1Prob = arg2Prob = arg3Prob = None
-        for key, value in MaxEntValues.iteritems():
-            # value = (NoneProb, ARG1Prob, ARG0Prob, ARG2Prob, ARG3Prob)
-            if tokenList[key][5] in self.ignoredClasses:
+        pos = 0
+        for value in self.getMaxEntValues(className):
+            if tokenList[pos][5] in self.ignoredClasses:
+                pos += 1
                 continue
-            if arg1Prob < value[1] > 0:
-                arg1Prob = value[1]
-                arg1Pos = key
-            if arg0Prob < value[2] > 0 and isClassName(self.ARG0Classes, className):
-                arg0Prob = value[2]
-                arg0Pos = key
-            if arg2Prob < value[3] > 0 and isClassName(self.ARG2Classes, className):
-                arg2Prob = value[3]
-                arg2Pos = key
-            if arg3Prob < value[4] > 0:
-                arg3Prob = value[4]
-                arg3Pos = key
+            if value.has_key('ARG0') and arg0Prob < value['ARG0'] > 0:
+                arg0Prob = value['ARG0']
+                arg0Pos = pos
+            if value.has_key('ARG1') and arg1Prob < value['ARG1'] > 0:
+                arg1Prob = value['ARG1']
+                arg1Pos = pos
+            if value.has_key('ARG2') and arg2Prob < value['ARG2'] > 0:
+                arg2Prob = value['ARG2']
+                arg2Pos = pos
+            if value.has_key('ARG3') and arg3Prob < value['ARG3'] > 0:
+                arg3Prob = value['ARG3']
+                arg3Pos = pos
+            pos += 1
+
 
         # TODO: figure out way to disambiguate between two competing tags
         for i in xrange(0, len(tokenList)):
@@ -456,22 +511,42 @@ class MaxEntRelationTagger():
                                                                   ,
                                                                   sysTag, keyClass))
 
-
-    def getMaxEntValues(self):
+    def getMaxEntValues(self, className):
         """Calls Ang's wrapper, opens the prediction file, and returns a dictionary
         of {tokenPosition: (NoneProb, ARG1Prob)}"""
-        self.GetPredictions()
-        prediction = open(self.predictFileName)
-        values = prediction.read().split()
-        ret = {}
-        if len(values) % 5:
-            raise Exception("{0} does not have 5 argument probabilities for MaxEnt".format(values))
-        for i in xrange(0, len(values), 5):
-            ret[i / 5] = []
-            for j in xrange(i, i + 5):
-                var = values[j].split('[')
-                ret[i / 5].append(float(var[1].split(']')[0]))
-        return ret
+        self.GetPredictions(self.testFileName(className), self.modelFileName(className),
+                            self.predictFileName(className))
+        prediction = open(self.predictFileName(className))
+        values = prediction.read().splitlines()
+        icoll = iter(values)
+        for item in icoll:
+            retVal = {}
+            item = item.split()
+            for i in item:
+                var1 = i.split('[')
+                var2 = float(var1[1].split(']')[0])
+                retVal[var1[0]] = var2
+            yield retVal
+
+
+
+            #values = prediction.read().split()
+
+#        ret = {}
+#        for i in xrange(0, len(values)):
+#            ret[i] = []
+#            tmp = values[i].split()
+#            for j in xrange(0, len(tmp)):
+#                var = tmp[j].split('[')
+#                ret[i].append(float(var[1].split(']')[0]))
+#        if len(values) % 5:
+#            raise Exception("{0} does not have 5 argument probabilities for MaxEnt".format(values))
+#        for i in xrange(0, len(values), 5):
+#            ret[i / 5] = []
+#            for j in xrange(i, i + 5):
+#                var = values[j].split('[')
+#                ret[i / 5].append(float(var[1].split(']')[0]))
+#        return ret
 
 
 def main():
@@ -480,7 +555,7 @@ def main():
         print('Usage: python2.6 hw7.py [devFileName] [outputFileName]')
         exit(1)
     MaxEntTagger = MaxEntRelationTagger(args[0], args[1])
-    #MaxEntTagger.TrainModel(100, 2)
+    MaxEntTagger.TrainModel(100, 2)
     MaxEntTagger.MaxEntTagFile()
 
 if __name__ == '__main__':
