@@ -156,13 +156,13 @@ class MaxEntRelationTagger():
 
     def __init__(self, devFileName, outFileName):
         """constructor for MaxEntRelationTagger"""
-        self.featuresFileName = 'features.dat'
-        if devFileName == 'dev-subset':
-            self.trainingFileName = 'training-subset'
+        self.featuresFileName = 'data/features.dat'
+        if devFileName == 'data/dev-subset':
+            self.trainingFileName = 'data/training-subset'
         else:
-            self.trainingFileName = 'training'
+            self.trainingFileName = 'data/training'
         self.devFileName, self.outFileName = devFileName, outFileName
-        self.modelFileName, self.predictFileName, self.testFileName = 'featuresModel.txt', 'features.predictions', 'features.test'
+        self.modelFileName, self.predictFileName, self.testFileName = 'data/featuresModel.txt', 'data/features.predictions', 'data/features.test'
 
     def readFile(self, fileName):
         """Reads a file and returns a list containing all the lines in the file"""
@@ -417,9 +417,9 @@ class MaxEntRelationTagger():
             elif i == arg3Pos:
                 sysTag = 'ARG3'
             else:
-                sysTag = 'None'
+                sysTag = ''
             outFile.write(
-                '{0}\t\t{1}\t\t{2}\t\t{3}\t\t{4}\t\t{5}\t\t{6}\t\t{7}\n'.format(word, POS, BIO, wordNum, sentNum,
+                '{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\n'.format(word, POS, BIO, wordNum, sentNum,
                                                                                 keyTag, sysTag, keyClass))
 
 
