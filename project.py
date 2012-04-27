@@ -172,11 +172,12 @@ class MaxEntRelationTagger():
 
     def __init__(self, devFileName, outFileName):
         """constructor for MaxEntRelationTagger"""
-        self.featuresFileName = 'features.dat'
-        if devFileName == 'dev-subset':
-            self.trainingFileName = 'training-subset'
+        self.featuresFileName = 'data/features.dat'
+        if devFileName == 'data/dev-subset':
+            self.trainingFileName = 'data/training-subset'
         else:
-            self.trainingFileName = 'training'
+            self.trainingFileName = 'data/training'
+        self.testFileName, self.predictFileName = 'data/features.test', 'data/features.predictions'
         self.devFileName, self.outFileName = devFileName, outFileName
         self.ARG0Classes = ['SHARE']
         self.ARG2Classes = ['SHARE', 'GROUP']
@@ -192,19 +193,13 @@ class MaxEntRelationTagger():
 
 
     def fixFileName(self, fileName):
-        return re.sub(r'[/]', '_', fileName)
+        return os.path.join("data", re.sub(r'[/]', '_', fileName))
 
     def featureFileName(self, fileName):
         return self.fixFileName(fileName) + '.dat'
 
-    def testFileName(self, fileName):
-        return self.fixFileName(fileName) + '.test'
-
     def modelFileName(self, fileName):
         return self.fixFileName(fileName) + 'Model.txt'
-
-    def predictFileName(self, fileName):
-        return self.fixFileName(fileName) + '.predictions'
 
 
     def TrainModel(self, numIterations, featureCutOff):
@@ -214,7 +209,7 @@ class MaxEntRelationTagger():
         featureCutOff = str(featureCutOff)
         # TODO: REMOVE THIS BEFORE SUBMITTING!!!!!!!!
         try:
-            self.taggedList = pickle.load(open("taggedList.pickle"))
+            self.taggedList = pickle.load(open("data/taggedList.pickle"))
             print('PICKLE successfully loaded')
         except IOError as e:
             print('Couldnt load PICKLE')
@@ -269,7 +264,7 @@ class MaxEntRelationTagger():
             if len(l) == 6:
                 l.append('None')
             taggedList.append(tuple(l))
-        pickleFile = open("taggedList.pickle", "w")
+        pickleFile = open("data/taggedList.pickle", "w")
         pickle.dump(taggedList, pickleFile)
         pickleFile.close()
         return taggedList
@@ -442,7 +437,7 @@ class MaxEntRelationTagger():
 
         if len(tokenList) > 0:
             print ('tagging sentence: {0}'.format(' '.join([tokenList[i][0] for i in xrange(0, len(tokenList))])))
-            self.MaxEntTagSentence(tokenList, outFile)
+            self.MaxEntTagSentence(tokenList, className, outFile)
         outFile.close()
 
 
@@ -457,7 +452,7 @@ class MaxEntRelationTagger():
                     '{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\n'.format(word, POS, BIO, wordNum, sentNum, keyTag))
             return
 
-        testFile = open(self.testFileName(className), 'w')
+        testFile = open(self.testFileName, 'w')
         self.writeAllWordFeatures(tokenList, testFile)
         testFile.close()
         #MaxEntValues = self.getMaxEntValues(className)
@@ -514,9 +509,9 @@ class MaxEntRelationTagger():
     def getMaxEntValues(self, className):
         """Calls Ang's wrapper, opens the prediction file, and returns a dictionary
         of {tokenPosition: (NoneProb, ARG1Prob)}"""
-        self.GetPredictions(self.testFileName(className), self.modelFileName(className),
-                            self.predictFileName(className))
-        prediction = open(self.predictFileName(className))
+        self.GetPredictions(self.testFileName, self.modelFileName(className),
+                            self.predictFileName)
+        prediction = open(self.predictFileName)
         values = prediction.read().splitlines()
         icoll = iter(values)
         for item in icoll:
