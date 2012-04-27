@@ -680,7 +680,7 @@ class MaxEntRelationTagger():
             currentState = (path[currentState], currentState[1] - 1)
         wordTagsList.reverse()
         wordTagsList = zip(tokenList, wordTagsList)
-        
+
         for ((word, POS, BIO, sentNum, wordNum, keyTag, keyClass), sysTag) in wordTagsList:
             keyTag = keyTag.replace('None', '')
             sysTag = sysTag.replace('None', '')
