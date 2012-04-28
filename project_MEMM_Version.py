@@ -457,7 +457,6 @@ class MaxEntRelationTagger():
         viterbi = numpy.zeros((N, T + 2), dtype = numpy.object)
         path = {}
         prevMEMMTag = 'None'
-        print('len(tokenList) = {0}, viterbi.shape = {1}'.format(len(tokenList), viterbi.shape))
         # first column, put a 1.0 in start symbol
         viterbi[0, 0] = 1.0
 
@@ -582,10 +581,9 @@ class MaxEntRelationTagger():
         wordTagsList.reverse()
         wordTagsList = zip(tokenList, wordTagsList)
 
-        for ((word, POS, BIO, sentNum, wordNum, keyTag, keyClass), sysTag) in wordTagsList:
+        for ((word, POS, BIO, wordNum, sentNum, keyTag, keyClass), sysTag) in wordTagsList:
             keyTag = keyTag.replace('None', '')
             sysTag = sysTag.replace('None', '')
-            sysTag = sysTag.replace('PRED', '')
             keyClass = keyClass.replace('None', '')
             outFile.write(
                 '{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\n'.format(word, POS, BIO, wordNum, sentNum, keyTag
@@ -599,7 +597,7 @@ def main():
         print('Usage: python2.6 hw7.py [devFileName] [outputFileName]')
         exit(1)
     MaxEntTagger = MaxEntRelationTagger(args[0], args[1])
-    MaxEntTagger.TrainModel(100, 2)
+    #MaxEntTagger.TrainModel(100, 2)
     MaxEntTagger.MEMMTagFile()
 
 if __name__ == '__main__':

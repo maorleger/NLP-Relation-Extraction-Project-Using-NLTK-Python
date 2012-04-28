@@ -48,37 +48,41 @@ import time
 
 
 #noinspection PyUnboundLocalVariable
-def score(sysOutFile, keyOutFile):
+def score(sysOutFile):
+    argList = ['ARG0', 'ARG1', 'ARG2', 'ARG3']
     correct = 0
     key = 0
+    updateSentNum = True
     system = 0
     falseTag = 0
     missedTag = 0
+    sentNum = 0
     sysOut = sysOutFile.readlines()
-    keyOut = keyOutFile.readlines()
-    if len(sysOut) <> len(keyOut):
-        raise Exception("dev and output file are not of same length")
-    for sysLine, keyLine in zip(sysOut, keyOut):
-        sysTup = sysLine.split()
-        keyTup = keyLine.split()
-        if sysTup and keyTup:
-            sentNum = sysTup[4]
-        if len(keyTup) > 5 and keyTup[5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
-            # key found
-            key += 1
-        if len(sysTup) > 6 and sysTup[6] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
-            # system found
-            system += 1
-            if sysTup[6] == sysTup[5]:
-                # one correct
-                correct += 1
-        elif len(sysTup) == 6 and sysTup[5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
-            # incorrect
-            if len(keyTup) < 6 or keyTup[5] not in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
+    for i in xrange(0, len(sysOut)):
+        sysTup = sysOut[i].replace('\n', '')
+        sysTup = sysTup.split('\t')
+        if sysTup and len(sysTup) == 8:
+            if updateSentNum:
+                sentNum = int(sysTup[4])
+            if sysTup[5] in argList:
+                # key found
+                key += 1
+                if sysTup[6] != sysTup[5]:
+                    missedTag += 1
+            if sysTup[6] in argList:
+                # system found
                 system += 1
-                falseTag += 1
-            else:
+                if sysTup[6] == sysTup[5]:
+                    correct += 1
+                else:
+                    falseTag += 1
+            elif sysTup[5] in argList:
+                # key but no system
                 missedTag += 1
+        else:
+            if len(sysTup) > 1:
+                raise Exception("Something went wrong... sysTup = {0}".format(sysTup))
+
     correct = float(correct)
     system = float(system)
     key = float(key)
@@ -93,7 +97,7 @@ def score(sysOutFile, keyOutFile):
             if precision > 0.0:
                 raise Exception("Something went wrong...")
             fscore = 0.0
-    print('Number of sentences = {0}\t Number of tokens = {1}\n'.format(int(sentNum) + 1,
+    print('Number of sentences = {0}\t Number of tokens = {1}\n'.format(sentNum,
                                                                         len([item for item in sysOut if item])))
     print('correct = {0}\tsystem = {1}\tkey = {2}\n'.format(correct, system, key))
     print('false tags = {0}\tmissed tags = {1}\n'.format(falseTag, missedTag))
@@ -102,13 +106,12 @@ def score(sysOutFile, keyOutFile):
 
 def main():
     global options, args
-    if len(args) < 2:
-        print('Usage: python2.6 project_scorer.py SystemOutputFileName KeyFile')
+    if len(args) < 1:
+        print('Usage: python2.6 project_scorer.py SystemOutputFileName')
         exit(1)
     sysOutFile = open(args[0])
-    keyOutFile = open(args[1])
 
-    score(sysOutFile, keyOutFile)
+    score(sysOutFile)
 
 if __name__ == '__main__':
     try:
