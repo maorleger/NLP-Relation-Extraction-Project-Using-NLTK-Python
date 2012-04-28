@@ -161,7 +161,7 @@ import cPickle as pickle
 
 
 def isClassName(ARGiClasses, className):
-    x = 5
+    f = jfdsf
     for ARGiClass in ARGiClasses:
         if ARGiClass in className:
             return True
@@ -200,7 +200,6 @@ class MaxEntRelationTagger():
 
     def modelFileName(self, fileName):
         return self.fixFileName(fileName) + 'Model.txt'
-
 
 
     def TrainModel(self, numIterations, featureCutOff):
@@ -400,26 +399,21 @@ class MaxEntRelationTagger():
                 self.writeOneWordFeatures(i, outputFile, sent, listOutput, MEMMTagGuess)
 
 
-
-
-
     def GetPredictions(self, test, model, predict):
         """Calls Ang's wrapper to get predictions"""
         sub.call(["java", "-jar", "-Xmx512m", "MaxEntPredict.jar", test, model,
                   predict], stdout = sub.PIPE)
 
-    def MaxEntTagFile(self):
+    def MEMMTagFile(self):
         """Tags an entire file by calling TagSentence on each sentence"""
         raw = self.readFile(self.devFileName)
         outFile = open(self.outFileName, 'w')
         tokenList = []
-        lines = []
         className = 'None'
         for line in raw:
             line = line.strip().split()
             if not line:
                 print ('tagging sentence: {0}'.format(' '.join([tokenList[i][0] for i in xrange(0, len(tokenList))])))
-                #self.MaxEntTagSentence(tokenList, className, outFile)
                 t = time.time()
                 self.MEMMTagSentence(tokenList, className, outFile)
                 print('time to tag in minutes: ', (time.time() - t) / 60.0)
@@ -444,7 +438,7 @@ class MaxEntRelationTagger():
             if not className or className[0] == 'None':
                 raise Exception("Something went wrong at the end of the file. TokenList = {0}".format(tokenList))
             className = className[0]
-            self.MaxEntTagSentence(tokenList, className, outFile)
+            self.MEMMTagSentence(tokenList, className, outFile)
         outFile.close()
 
     def MEMMTagSentence(self, tokenList, className, outFile):
@@ -456,7 +450,7 @@ class MaxEntRelationTagger():
                 outFile.write(
                     '{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\n'.format(word, POS, BIO, wordNum, sentNum, keyTag))
             return
-        stateList = {0: '<s>', 1: 'ARG0', 2: 'ARG1', 3: 'ARG2', 4: 'ARG3',  5: 'None', 6: 'PRED', 7: '<qF>'}
+        stateList = {0: '<s>', 1: 'ARG0', 2: 'ARG1', 3: 'ARG2', 4: 'ARG3', 5: 'None', 6: 'PRED', 7: '<qF>'}
         N = len(stateList)
         T = len(tokenList)
         predPos = li.index('PRED')
@@ -467,6 +461,15 @@ class MaxEntRelationTagger():
         # first column, put a 1.0 in start symbol
         viterbi[0, 0] = 1.0
 
+        # TODO: find a way to minimize the calls to MaxEntPredict
+        testFile = open(self.testFileName, 'w')
+        for i in xrange(1, len(tokenList)):
+            for j in xrange(1, len(stateList) - 1):
+                self.writeOneWordFeatures(i, testFile, tokenList, MEMMTagGuess = stateList[j])
+        testFile.close()
+
+
+
         # second column
         if not predPos:
             # the first word IS the predicate (i.e. the position of the predicate == 0)
@@ -476,7 +479,7 @@ class MaxEntRelationTagger():
             prevMEMMTag = 'PRED'
         else:
             testFile = open(self.testFileName, 'w')
-            self.writeOneWordFeatures(0, testFile, tokenList, MEMMTagGuess='None')
+            self.writeOneWordFeatures(0, testFile, tokenList, MEMMTagGuess = 'None')
             testFile.close()
 
             for item in self.getMaxEntValues(className):
@@ -512,13 +515,14 @@ class MaxEntRelationTagger():
                 continue
 
             testFile = open(self.testFileName, 'w')
-            self.writeOneWordFeatures(ts - 1, testFile, tokenList, MEMMTagGuess=prevMEMMTag)
+            self.writeOneWordFeatures(ts - 1, testFile, tokenList, MEMMTagGuess = prevMEMMTag)
             testFile.close()
 
             MaxEntValues = None
             for item in self.getMaxEntValues(className):
                 if MaxEntValues is not None:
-                    raise Exception('Error: something went wrong, more than one MaxEntValue row. tokenList={0}'.format(tokenList))
+                    raise Exception(
+                        'Error: something went wrong, more than one MaxEntValue row. tokenList={0}'.format(tokenList))
                 MaxEntValues = item
 
             for s in xrange(1, N - 1):
@@ -527,12 +531,12 @@ class MaxEntRelationTagger():
                     argmax = ()
 
                     for sp in xrange(1, N - 1):
-                        # prob = V_{t-1}(sp) * P(s_j | s_sp, o_t) for 1<=j<=N, 1<t<=T
-                        # we find the maximum value for prob for sp=1 to N-1
-                            prob = viterbi[sp, ts - 1] * MaxEntValues[stateList[s]]
-                            if viterbi[s, ts] < prob:
-                                viterbi[s, ts] = prob
-                                argmax = (sp, ts - 1)
+                    # prob = V_{t-1}(sp) * P(s_j | s_sp, o_t) for 1<=j<=N, 1<t<=T
+                    # we find the maximum value for prob for sp=1 to N-1
+                        prob = viterbi[sp, ts - 1] * MaxEntValues[stateList[s]]
+                        if viterbi[s, ts] < prob:
+                            viterbi[s, ts] = prob
+                            argmax = (sp, ts - 1)
                     path[(s, ts)] = argmax[0]
 
             # find the most likely state for the current observation
@@ -552,104 +556,6 @@ class MaxEntRelationTagger():
         path[(N - 1, T + 1)] = argmax[0]
         self.writeTaggedOutputToFile(path, outFile, tokenList, stateList)
 
-
-
-
-    def pPrintMEMM(self, viterbi, tokenList, lastColumn, stateList):
-        numpy.set_printoptions(precision = 3)
-        if not lastColumn:
-            print ('last observation tagged: start symbol')
-        else:
-            print('last observation tagged: {0}'.format(tokenList[lastColumn][0]))
-        string = ''
-        for (w, t, n) in tokenList:
-            string += '{0:20}'.format(w)
-        print ('{0:30}{1}'.format('state', string))
-        for (state, row) in zip(stateList.values(), viterbi):
-            print ('{0:10}{1}'.format(state, self.getRowString(row)))
-
-
-    def getRowString(self, row):
-        string = '{0:5}'.format(str(row[0]))
-        for item in row[1:]:
-            string += '{0:20}'.format(item)
-        return string
-
-
-
-
-
-
-
-
-
-
-
-
-    def MaxEntTagSentence(self, tokenList, className, outFile):
-        """Finds the most probable ARG1 for a sentence and outputs the input with the system choice for ARG1"""
-        li = [item[5] for item in tokenList]
-        if not li.count('PRED'):
-            for item in tokenList:
-                (word, POS, BIO, wordNum, sentNum, keyTag) = item[:6]
-                keyTag = keyTag.replace('None', '')
-                outFile.write(
-                    '{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\n'.format(word, POS, BIO, wordNum, sentNum, keyTag))
-            return
-
-        testFile = open(self.testFileName, 'w')
-        self.writeAllWordFeatures(tokenList, testFile)
-        testFile.close()
-
-
-
-
-
-        # Find the most probable ARG1
-        # TODO: experiment if its better to use elif or regular ifs. with regular if statements the idea is that the same word can be guessed as two predicates. With elif the idea is that each token can only have at most one sysTag. Note: if choosing regular ifs we need to modify both if statemetns below (see TO DO2) AND scoring algorithm
-        arg0Pos = arg1Pos = arg2Pos = arg3Pos = None
-        arg0Prob = arg1Prob = arg2Prob = arg3Prob = None
-        pos = 0
-        for value in self.getMaxEntValues(className):
-            if tokenList[pos][5] in self.ignoredClasses:
-                pos += 1
-                continue
-            if value.has_key('ARG0') and arg0Prob < value['ARG0'] > 0:
-                arg0Prob = value['ARG0']
-                arg0Pos = pos
-            if value.has_key('ARG1') and arg1Prob < value['ARG1'] > 0:
-                arg1Prob = value['ARG1']
-                arg1Pos = pos
-            if value.has_key('ARG2') and arg2Prob < value['ARG2'] > 0:
-                arg2Prob = value['ARG2']
-                arg2Pos = pos
-            if value.has_key('ARG3') and arg3Prob < value['ARG3'] > 0:
-                arg3Prob = value['ARG3']
-                arg3Pos = pos
-            pos += 1
-
-
-        # TODO: figure out way to disambiguate between two competing tags
-        for i in xrange(0, len(tokenList)):
-            if 0 < len(tokenList[i]) < 7:
-                raise Exception('Error: Invalid token. Token: {0}'.format(tokenList[i]))
-            (word, POS, BIO, wordNum, sentNum, keyTag) = tokenList[i][:6]
-            keyClass = tokenList[i][6].replace('None', '')
-            keyTag = keyTag.replace('None', '')
-            if i == arg0Pos:
-                sysTag = 'ARG0'
-            elif i == arg1Pos:
-                sysTag = 'ARG1'
-            elif i == arg2Pos:
-                sysTag = 'ARG2'
-            elif i == arg3Pos:
-                sysTag = 'ARG3'
-            else:
-                sysTag = ''
-            outFile.write(
-                '{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\n'.format(word, POS, BIO, wordNum, sentNum, keyTag
-                                                                  ,
-                                                                  sysTag, keyClass))
 
     def getMaxEntValues(self, className):
         """Calls Ang's wrapper, opens the prediction file, and returns a dictionary
@@ -691,14 +597,15 @@ class MaxEntRelationTagger():
                                                                   ,
                                                                   sysTag, keyClass))
 
+
 def main():
     global options, args
     if len(args) < 2:
         print('Usage: python2.6 hw7.py [devFileName] [outputFileName]')
         exit(1)
     MaxEntTagger = MaxEntRelationTagger(args[0], args[1])
-    MaxEntTagger.TrainModel(100, 2)
-    MaxEntTagger.MaxEntTagFile()
+    #MaxEntTagger.TrainModel(100, 2)
+    MaxEntTagger.MEMMTagFile()
 
 if __name__ == '__main__':
     try:
