@@ -159,13 +159,6 @@ import cPickle as pickle
 
 
 
-def isClassName(ARGiClasses, className):
-    x = 5
-    for ARGiClass in ARGiClasses:
-        if ARGiClass in className:
-            return True
-    return False
-
 
 class MaxEntRelationTagger():
     """The MaxEntRelationTagger class - contains everything needed to run a MaxEntRelationTagger tagger"""
@@ -211,7 +204,7 @@ class MaxEntRelationTagger():
         try:
             self.taggedList = pickle.load(open("data/taggedList.pickle"))
             print('PICKLE successfully loaded')
-        except IOError as e:
+        except IOError:
             print('Couldnt load PICKLE')
             raw = self.readFile(self.trainingFileName)
             self.taggedList = self.getTaggedList(raw)
@@ -230,7 +223,6 @@ class MaxEntRelationTagger():
                 oneSent.append(item)
                 if item[5] == 'PRED':
                     className = item[6]
-                    dataFile = openFiles[className]
             else:
                 i += 1
                 print('i={0} %completed={1}'.format(i, float(i) / totalSents))
@@ -401,7 +393,6 @@ class MaxEntRelationTagger():
         raw = self.readFile(self.devFileName)
         outFile = open(self.outFileName, 'w')
         tokenList = []
-        lines = []
         className = 'None'
         for line in raw:
             line = line.strip().split()
