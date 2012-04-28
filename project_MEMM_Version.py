@@ -266,14 +266,14 @@ class MaxEntRelationTagger():
         existSupportBetweenCandPred = existVerbBetweenCandPred = False
 
         # tokensBetweenCandPred
-        tokensBetween = spList[0][firstItemIndex + 1:secondItemIndex]
+        tokensBetween = spList[0][firstItemIndex:secondItemIndex + 1]
         tokensBetweenCandPred = '_'.join(tokensBetween)
 
         # numberOfTokensBetween
         numberOfTokensBetween = len(tokensBetween)
 
         # possBetweenCandPred
-        tokensBetween = spList[1][firstItemIndex + 1:secondItemIndex]
+        tokensBetween = spList[1][firstItemIndex:secondItemIndex + 1]
         possBetweenCandPred = '_'.join(tokensBetween)
 
         # existVerbBetweenCandPred
@@ -318,7 +318,7 @@ class MaxEntRelationTagger():
         ChunkChain = '_'.join(ChunkChain)
 
         # existSupportBetweenCandPred
-        tokensBetween = spList[5][firstItemIndex + 1:secondItemIndex]
+        tokensBetween = spList[5][firstItemIndex:secondItemIndex + 1]
         if tokensBetween.count('SUPPORT') > 0:
             existSupportBetweenCandPred = True
 
@@ -602,7 +602,7 @@ def main():
         print('Usage: python2.6 hw7.py [devFileName] [outputFileName]')
         exit(1)
     MaxEntTagger = MaxEntRelationTagger(args[0], args[1])
-    MaxEntTagger.TrainModel(100, 2)
+    #MaxEntTagger.TrainModel(100, 2)
     MaxEntTagger.MEMMTagFile()
 
 if __name__ == '__main__':
