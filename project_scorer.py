@@ -52,7 +52,6 @@ def score(sysOutFile):
     argList = ['ARG0', 'ARG1', 'ARG2', 'ARG3']
     correct = 0
     key = 0
-    updateSentNum = True
     system = 0
     falseTag = 0
     missedTag = 0
@@ -62,8 +61,7 @@ def score(sysOutFile):
         sysTup = sysOut[i].replace('\n', '')
         sysTup = sysTup.split('\t')
         if sysTup and len(sysTup) == 8:
-            if updateSentNum:
-                sentNum = int(sysTup[4])
+            sentNum = int(sysTup[4])
             if sysTup[5] in argList:
                 # key found
                 key += 1
@@ -76,9 +74,6 @@ def score(sysOutFile):
                     correct += 1
                 else:
                     falseTag += 1
-            elif sysTup[5] in argList:
-                # key but no system
-                missedTag += 1
         else:
             if len(sysTup) > 1:
                 raise Exception("Something went wrong... sysTup = {0}".format(sysTup))
@@ -97,7 +92,7 @@ def score(sysOutFile):
             if precision > 0.0:
                 raise Exception("Something went wrong...")
             fscore = 0.0
-    print('Number of sentences = {0}\t Number of tokens = {1}\n'.format(sentNum,
+    print('Number of sentences = {0}\t Number of tokens = {1}\n'.format(sentNum + 1,
                                                                         len([item for item in sysOut if item])))
     print('correct = {0}\tsystem = {1}\tkey = {2}\n'.format(correct, system, key))
     print('false tags = {0}\tmissed tags = {1}\n'.format(falseTag, missedTag))
@@ -110,7 +105,6 @@ def main():
         print('Usage: python2.6 project_scorer.py SystemOutputFileName')
         exit(1)
     sysOutFile = open(args[0])
-
     score(sysOutFile)
 
 if __name__ == '__main__':
