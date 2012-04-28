@@ -387,6 +387,7 @@ class MaxEntRelationTagger():
                             'NNPS', 'VBP', 'DT', 'JJR', 'WP$', 'WP', 'RBR', 'RB', 'JJS', 'WDT', 'TO', '$', 'WRB', '``']
         for i in xrange(0, len(sent)):
             if not limitedSet or (sent[i][5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3'] or sent[i][1] in negPOSSampleList):
+                # kept limited set of negative samples... see commit
                 self.writeOneWordFeatures(i, outputFile, sent, listOutput, MEMMTagGuess)
 
 
