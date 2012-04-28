@@ -461,43 +461,47 @@ class MaxEntRelationTagger():
         # first column, put a 1.0 in start symbol
         viterbi[0, 0] = 1.0
 
-        # TODO: find a way to minimize the calls to MaxEntPredict
         testFile = open(self.testFileName, 'w')
+        self.writeOneWordFeatures(0, testFile, tokenList, MEMMTagGuess = 'None')
         for i in xrange(1, len(tokenList)):
             for j in xrange(1, len(stateList) - 1):
                 self.writeOneWordFeatures(i, testFile, tokenList, MEMMTagGuess = stateList[j])
+
         testFile.close()
 
+        AllMaxEntValues = {0: {}}
+        for i in xrange(1, len(tokenList)):
+            AllMaxEntValues[i] = {}
+        i = 1
+        tokenIndex = 0
+        otherState = stateList[i]
+        for item in self.getMaxEntValues(className):
+            if not tokenIndex:
+                # only one row to get back because we are in the first token
+                AllMaxEntValues[tokenIndex]['None'] = item
+                tokenIndex += 1
+            else:
+                AllMaxEntValues[tokenIndex][otherState] = item
+                i += 1
+                if i % 7 == 0:
+                    tokenIndex += 1
+                    i += 1 # to skip the <s> tag
+                otherState = stateList[i % 7]
 
+        MaxEntValues = AllMaxEntValues[0]
+        for s in xrange(1, N - 1):
+            state = stateList[s]
+            if MaxEntValues.has_key(state):
+                viterbi[s, 1] = MaxEntValues[state]['None']
+            else:
+                viterbi[s, 1] = 0.0
+            path[(s, 1)] = 0
 
-        # second column
-        if not predPos:
-            # the first word IS the predicate (i.e. the position of the predicate == 0)
-            viterbi[:, 1] = 0.0
-            viterbi[6, 1] = 1.0
-            path[(6, 1)] = 0
-            prevMEMMTag = 'PRED'
-        else:
-            testFile = open(self.testFileName, 'w')
-            self.writeOneWordFeatures(0, testFile, tokenList, MEMMTagGuess = 'None')
-            testFile.close()
-
-            for item in self.getMaxEntValues(className):
-                MaxEntValues = item
-
-            for s in xrange(1, N - 1):
-                state = stateList[s]
-                if MaxEntValues.has_key(state):
-                    viterbi[s, 1] = MaxEntValues[state]
-                else:
-                    viterbi[s, 1] = 0.0
-                path[(s, 1)] = 0
-
-            # find most likely tag
-            prob, prevMEMMTag = None, 'None'
-            for s in xrange(1, N - 1):
-                if viterbi[s, 1] > prob:
-                    prob, prevMEMMTag = viterbi[s, 1], stateList[s]
+        # find most likely tag
+        prob, prevMEMMTag = None, 'None'
+        for s in xrange(1, N - 1):
+            if viterbi[s, 1] > prob:
+                prob, prevMEMMTag = viterbi[s, 1], stateList[s]
 
 
         # 3rd column to 2nd to last column
@@ -514,16 +518,7 @@ class MaxEntRelationTagger():
                         break
                 continue
 
-            testFile = open(self.testFileName, 'w')
-            self.writeOneWordFeatures(ts - 1, testFile, tokenList, MEMMTagGuess = prevMEMMTag)
-            testFile.close()
-
-            MaxEntValues = None
-            for item in self.getMaxEntValues(className):
-                if MaxEntValues is not None:
-                    raise Exception(
-                        'Error: something went wrong, more than one MaxEntValue row. tokenList={0}'.format(tokenList))
-                MaxEntValues = item
+            MaxEntValues = AllMaxEntValues[ts - 1][prevMEMMTag]
 
             for s in xrange(1, N - 1):
                 if MaxEntValues.has_key(stateList[s]):
@@ -604,7 +599,7 @@ def main():
         print('Usage: python2.6 hw7.py [devFileName] [outputFileName]')
         exit(1)
     MaxEntTagger = MaxEntRelationTagger(args[0], args[1])
-    #MaxEntTagger.TrainModel(100, 2)
+    MaxEntTagger.TrainModel(100, 2)
     MaxEntTagger.MEMMTagFile()
 
 if __name__ == '__main__':
