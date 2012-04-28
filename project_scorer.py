@@ -66,11 +66,16 @@ def score(sysOutFile):
                 # key found
                 key += 1
                 if sysTup[6] != sysTup[5]:
-                    missedTag += 1
+                    if (sysTup[6] != 'ARG1' and sysTup[5] != 'ARG3') or (sysTup[6] != 'ARG3' and sysTup[5] != 'ARG1'):
+                        missedTag += 1
             if sysTup[6] in argList:
                 # system found
                 system += 1
                 if sysTup[6] == sysTup[5]:
+                    correct += 1
+                elif sysTup[6] == 'ARG1' and sysTup[5] == 'ARG3':
+                    correct += 1
+                elif sysTup[6] == 'ARG3' and sysTup[5] == 'ARG1':
                     correct += 1
                 else:
                     falseTag += 1

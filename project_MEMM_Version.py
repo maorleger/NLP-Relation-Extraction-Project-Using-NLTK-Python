@@ -442,10 +442,15 @@ class MaxEntRelationTagger():
                 outFile.write(
                     '{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\n'.format(word, POS, BIO, wordNum, sentNum, keyTag))
             return
-        stateList = {0: '<s>', 1: 'ARG0', 2: 'ARG1', 3: 'ARG2', 4: 'ARG3', 5: 'None', 6: 'PRED', 7: '<qF>'}
+        stateList = {0: '<s>', 1: 'ARG0', 2: 'ARG1', 3: 'ARG2', 4: 'ARG3', 5: 'None', 6: 'PRED', 7: 'SUPPORT',
+                     8: '<qF>'}
         N = len(stateList)
         T = len(tokenList)
         predPos = li.index('PRED')
+        if li.count('SUPPORT'):
+            supportPos = li.index('SUPPORT')
+        else:
+            supportPos = None
         viterbi = numpy.zeros((N, T + 2), dtype = numpy.object)
         path = {}
         prevMEMMTag = 'None'
@@ -474,10 +479,10 @@ class MaxEntRelationTagger():
             else:
                 AllMaxEntValues[tokenIndex][otherState] = item
                 i += 1
-                if i % 7 == 0:
+                if i % 8 == 0:
                     tokenIndex += 1
                     i += 1 # to skip the <s> tag
-                otherState = stateList[i % 7]
+                otherState = stateList[i % 8]
 
         MaxEntValues = AllMaxEntValues[0]
         for s in xrange(1, N - 1):
@@ -508,7 +513,15 @@ class MaxEntRelationTagger():
                         prevMEMMTag = 'PRED'
                         break
                 continue
-
+            elif supportPos is not None and ts - 1 == supportPos:
+                # we are in the support
+                viterbi[7, ts] = 1.0
+                for key, value in stateList.iteritems():
+                    if value == prevMEMMTag:
+                        path[(7, ts)] = key
+                        prevMEMMTag = 'SUPPORT'
+                        break
+                continue
             MaxEntValues = AllMaxEntValues[ts - 1][prevMEMMTag]
 
             for s in xrange(1, N - 1):
@@ -589,7 +602,7 @@ def main():
         print('Usage: python2.6 hw7.py [devFileName] [outputFileName]')
         exit(1)
     MaxEntTagger = MaxEntRelationTagger(args[0], args[1])
-    #MaxEntTagger.TrainModel(100, 2)
+    MaxEntTagger.TrainModel(100, 2)
     MaxEntTagger.MEMMTagFile()
 
 if __name__ == '__main__':
