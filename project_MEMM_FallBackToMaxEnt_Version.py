@@ -269,7 +269,7 @@ class MaxEntRelationTagger():
         """A method to collect features between two tokens. Returns a dictionary of features extracted"""
         candPredInSameNP = candPredInSameVP = candPredInSamePP = False
         existSupportBetweenCandPred = existVerbBetweenCandPred = False
-
+        supportToken = None
         # tokensBetweenCandPred
         tokensBetween = spList[0][firstItemIndex:secondItemIndex + 1]
         tokensBetweenCandPred = '_'.join(tokensBetween)
@@ -338,8 +338,8 @@ class MaxEntRelationTagger():
             'candPredInSameNP': candPredInSameNP,
             'candPredInSameVP': candPredInSameVP,
             'candPredInSamePP': candPredInSamePP,
-            'existSupportBetweenCandPred': existSupportBetweenCandPred
-        }
+            'existSupportBetweenCandPred': existSupportBetweenCandPred,
+            }
 
 
     def writeOneWordFeatures(self, i, outputFile, sent, namedEntityChunks, listOutput = False, MEMMTagGuess = None):
@@ -383,13 +383,27 @@ class MaxEntRelationTagger():
                 featuresDict['predNETag'] = namedEntityChunks[predNEPos].node
                 if featuresDict.has_key('candNETag'):
                     featuresDict['candPredNETags'] = '_'.join((featuresDict['candNETag'], featuresDict['predNETag']))
+
             if spList[6][predIndex] != 'None':
                 featuresDict['predToken'] = spList[0][predIndex] # added predToken 4/29
                 featuresDict['relationClass'] = spList[6][predIndex]
+
+                if spList[5].count('SUPPORT'):
+                    # added 4/29
+                    featuresDict['supportToken'] = spList[0][spList[5].index('SUPPORT')]
             if i < predIndex:
                 featuresDict.update(self.getFeatures(i, predIndex, spList))
+                # added 4/29
+                if featuresDict.has_key('supportToken') and featuresDict.has_key('existSupportBetweenCandPred'):
+                    featuresDict['candPredSupportTokens'] = '_'.join(
+                        (featuresDict['candToken'], featuresDict['supportToken'], featuresDict['predToken']))
+                featuresDict['predCand'] = '_'.join((featuresDict['candToken'], featuresDict['predToken'])) # added 4/29
             else:
                 featuresDict.update(self.getFeatures(predIndex, i, spList))
+                # added 4/29
+                if featuresDict.has_key('supportToken') and featuresDict.has_key('existSupportBetweenCandPred'):
+                    featuresDict['candPredSupportTokens'] = '_'.join(
+                        (featuresDict['predToken'], featuresDict['supportToken'], featuresDict['candToken']))
         outputFile.write('{0} {1}\n'.format(" ".join(
             ['%s=%s' % (key, value) for key, value in featuresDict.iteritems() if
              key != 'output' and value != '']), featuresDict['output']))
@@ -669,7 +683,7 @@ class MaxEntRelationTagger():
             keyClass = tokenList[i][6].replace('None', '')
             keyTag = keyTag.replace('None', '')
             if keyTag in self.ignoredClasses:
-                sysTag = keyTag
+                sysTag = 'USED MaxEnt' # TODO: change this later to sysTag = keyTag
             elif i == arg0Pos:
                 sysTag = 'ARG0'
             elif i == arg1Pos:
