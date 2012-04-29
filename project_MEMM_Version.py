@@ -602,7 +602,7 @@ def main():
         print('Usage: python2.6 hw7.py [devFileName] [outputFileName]')
         exit(1)
     MaxEntTagger = MaxEntRelationTagger(args[0], args[1])
-    #MaxEntTagger.TrainModel(100, 2)
+    MaxEntTagger.TrainModel(100, 2)
     MaxEntTagger.MEMMTagFile()
 
 if __name__ == '__main__':

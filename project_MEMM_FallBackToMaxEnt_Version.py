@@ -574,6 +574,7 @@ class MaxEntRelationTagger():
             yield retVal
 
     def writeTaggedOutputToFile(self, path, outFile, tokenList, stateList, className):
+        global fallBackCount
         states = path.keys()
         states.sort(key = lambda x: x[1])
         states.reverse()
@@ -610,8 +611,14 @@ class MaxEntRelationTagger():
 
         # Find the most probable ARG1
         # TODO: experiment if its better to use elif or regular ifs. with regular if statements the idea is that the same word can be guessed as two predicates. With elif the idea is that each token can only have at most one sysTag. Note: if choosing regular ifs we need to modify both if statemetns below (see TO DO2) AND scoring algorithm
+
+
         arg0Pos = arg1Pos = arg2Pos = arg3Pos = None
-        arg0Prob = arg1Prob = arg2Prob = arg3Prob = None
+        # attempt to shimmy up initial probabilities so that only high scoring results will be registered
+        arg1Prob = None
+        arg0Prob = 0.5
+        arg2Prob = 0.5
+        arg3Prob = 0.5
         pos = 0
         for value in self.getMaxEntValues(className):
             if tokenList[pos][5] in self.ignoredClasses:
@@ -661,7 +668,7 @@ def main():
         print('Usage: python2.6 hw7.py [devFileName] [outputFileName]')
         exit(1)
     MaxEntTagger = MaxEntRelationTagger(args[0], args[1])
-    MaxEntTagger.TrainModel(100, 2)
+    #MaxEntTagger.TrainModel(100, 2)
     MaxEntTagger.MEMMTagFile()
 
 if __name__ == '__main__':
