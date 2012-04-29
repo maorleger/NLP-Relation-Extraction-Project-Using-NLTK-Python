@@ -164,10 +164,7 @@ class MaxEntRelationTagger():
 
     def __init__(self, devFileName, outFileName):
         """constructor for MaxEntRelationTagger"""
-        if devFileName == 'data/dev-subset':
-            self.trainingFileName = 'data/training-subset'
-        else:
-            self.trainingFileName = 'data/training'
+        self.trainingFileName = 'data/training'
         self.devFileName, self.outFileName = devFileName, outFileName
         self.testFileName, self.predictFileName = 'data/features.test', 'data/features.predictions'
         self.ARG0Classes = ['SHARE']
@@ -364,6 +361,7 @@ class MaxEntRelationTagger():
         if spList[5].count('PRED') > 0:
             predIndex = spList[5].index('PRED')
             if spList[6][predIndex] != 'None':
+                #featuresDict['predToken'] = spList[0][predIndex]
                 featuresDict['relationClass'] = spList[6][predIndex]
             if i < predIndex:
                 featuresDict.update(self.getFeatures(i, predIndex, spList))
@@ -448,7 +446,7 @@ class MaxEntRelationTagger():
         T = len(tokenList)
         predPos = li.index('PRED')
         if li.count('SUPPORT'):
-            supportPos = li.index('SUPPORT')
+            supportPos = [i for i, val in enumerate(li) if val == 'SUPPORT']
         else:
             supportPos = None
         viterbi = numpy.zeros((N, T + 2), dtype = numpy.object)
@@ -513,7 +511,7 @@ class MaxEntRelationTagger():
                         prevMEMMTag = 'PRED'
                         break
                 continue
-            elif supportPos is not None and ts - 1 == supportPos:
+            elif supportPos is not None and ts - 1 in supportPos:
                 # we are in the support
                 viterbi[7, ts] = 1.0
                 for key, value in stateList.iteritems():
@@ -615,7 +613,7 @@ class MaxEntRelationTagger():
 
         arg0Pos = arg1Pos = arg2Pos = arg3Pos = None
         # attempt to shimmy up initial probabilities so that only high scoring results will be registered
-        arg1Prob = None
+        arg1Prob = 0.01
         arg0Prob = 0.5
         arg2Prob = 0.5
         arg3Prob = 0.5
@@ -638,7 +636,6 @@ class MaxEntRelationTagger():
                 arg3Pos = pos
             pos += 1
 
-
         # TODO: figure out way to disambiguate between two competing tags
         for i in xrange(0, len(tokenList)):
             if 0 < len(tokenList[i]) < 7:
@@ -646,7 +643,9 @@ class MaxEntRelationTagger():
             (word, POS, BIO, wordNum, sentNum, keyTag) = tokenList[i][:6]
             keyClass = tokenList[i][6].replace('None', '')
             keyTag = keyTag.replace('None', '')
-            if i == arg0Pos:
+            if keyTag in self.ignoredClasses:
+                sysTag = keyTag
+            elif i == arg0Pos:
                 sysTag = 'ARG0'
             elif i == arg1Pos:
                 sysTag = 'ARG1'
@@ -668,7 +667,7 @@ def main():
         print('Usage: python2.6 hw7.py [devFileName] [outputFileName]')
         exit(1)
     MaxEntTagger = MaxEntRelationTagger(args[0], args[1])
-    #MaxEntTagger.TrainModel(100, 2)
+    MaxEntTagger.TrainModel(100, 2)
     MaxEntTagger.MEMMTagFile()
 
 if __name__ == '__main__':

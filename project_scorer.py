@@ -48,6 +48,9 @@ import time
 
 
 #noinspection PyUnboundLocalVariable
+
+
+
 def score(sysOutFile):
     argList = ['ARG0', 'ARG1', 'ARG2', 'ARG3']
     correct = 0
