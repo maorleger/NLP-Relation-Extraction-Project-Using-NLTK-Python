@@ -41,7 +41,14 @@ LICENSE
 
 """
 import numpy
-
+# TODO: MAKE SURE THE INSTRUCTIONS TELL ANG TO DOWNLOAD NLTK NE CHUNKER AS FOLLOWS:
+# python2.6
+# import nltk
+# nltk.download()
+# d maxent_ne_chunker
+# d words
+# q
+# CTRL+d
 __author__ = 'Maor Leger'
 
 import sys, os, traceback, optparse
@@ -49,6 +56,8 @@ import time
 import re
 import subprocess as sub
 import cPickle as pickle
+import nltk
+import cProfile as profile
 #
 #Some specs:
 #first six columns are same as hw7.
@@ -220,7 +229,7 @@ class MaxEntRelationTagger():
                     className = item[6]
             else:
                 i += 1
-                #print('i={0} %completed={1}'.format(i, float(i) / totalSents))
+                print('i={0} %completed={1}'.format(i, float(i) / totalSents))
                 if className != 'None':
                     self.writeAllWordFeatures(oneSent, openFiles[className], True, True)
                 oneSent = []
@@ -281,6 +290,7 @@ class MaxEntRelationTagger():
         tokensBetween = spList[2][firstItemIndex:secondItemIndex + 1]
         BIOChunkChain = '_'.join(tokensBetween)
 
+
         # ChunkChain
         ChunkChain = [re.sub(r'[A-Za-z]-', '', tokensBetween[0])]
 
@@ -332,7 +342,7 @@ class MaxEntRelationTagger():
         }
 
 
-    def writeOneWordFeatures(self, i, outputFile, sent, listOutput = False, MEMMTagGuess = None):
+    def writeOneWordFeatures(self, i, outputFile, sent, namedEntityChunks, listOutput = False, MEMMTagGuess = None):
         featuresDict = {
             'candToken': sent[i][0],
             'candTokenPOS': sent[i][1]
@@ -357,11 +367,24 @@ class MaxEntRelationTagger():
             # can use token after candidate
             featuresDict['tokenAfterCand'] = sent[i + 1][0]
             featuresDict['posAfterCand'] = sent[i + 1][1]
+
+        # added candNETag 4/29
+        candNEPos = namedEntityChunks.leaf_treeposition(i)[0]
+        if isinstance(namedEntityChunks[candNEPos], nltk.Tree):
+            featuresDict['candNETag'] = namedEntityChunks[candNEPos].node
+        else:
+            featuresDict['candNETag'] = 'None'
         spList = zip(*sent)
         if spList[5].count('PRED') > 0:
             predIndex = spList[5].index('PRED')
+            predNEPos = namedEntityChunks.leaf_treeposition(i)[0]
+            # added predNETag and candPredNETags 4/29
+            if isinstance(namedEntityChunks[predNEPos], nltk.Tree):
+                featuresDict['predNETag'] = namedEntityChunks[predNEPos].node
+                if featuresDict.has_key('candNETag'):
+                    featuresDict['candPredNETags'] = '_'.join((featuresDict['candNETag'], featuresDict['predNETag']))
             if spList[6][predIndex] != 'None':
-                #featuresDict['predToken'] = spList[0][predIndex]
+                featuresDict['predToken'] = spList[0][predIndex] # added predToken 4/29
                 featuresDict['relationClass'] = spList[6][predIndex]
             if i < predIndex:
                 featuresDict.update(self.getFeatures(i, predIndex, spList))
@@ -382,10 +405,11 @@ class MaxEntRelationTagger():
 
         negPOSSampleList = ['NN', 'NNS', 'NNP', 'VBD', 'PRP$', 'JJ', 'IN', 'VB', 'VBN', 'VBG', 'VBZ', 'CD', 'PRP',
                             'NNPS', 'VBP', 'DT', 'JJR', 'WP$', 'WP', 'RBR', 'RB', 'JJS', 'WDT', 'TO', '$', 'WRB', '``']
+        namedEntityChunks = nltk.ne_chunk([item[:2] for item in sent])
         for i in xrange(0, len(sent)):
             if not limitedSet or (sent[i][5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3'] or sent[i][1] in negPOSSampleList):
                 # kept limited set of negative samples... see commit
-                self.writeOneWordFeatures(i, outputFile, sent, listOutput, MEMMTagGuess)
+                self.writeOneWordFeatures(i, outputFile, sent, namedEntityChunks, listOutput, MEMMTagGuess)
 
 
     def GetPredictions(self, test, model, predict):
@@ -455,11 +479,12 @@ class MaxEntRelationTagger():
         # first column, put a 1.0 in start symbol
         viterbi[0, 0] = 1.0
 
+        neChunks = nltk.ne_chunk([item[:2] for item in tokenList])
         testFile = open(self.testFileName, 'w')
-        self.writeOneWordFeatures(0, testFile, tokenList, MEMMTagGuess = 'None')
+        self.writeOneWordFeatures(0, testFile, tokenList, neChunks, MEMMTagGuess = 'None')
         for i in xrange(1, len(tokenList)):
             for j in xrange(1, len(stateList) - 1):
-                self.writeOneWordFeatures(i, testFile, tokenList, MEMMTagGuess = stateList[j])
+                self.writeOneWordFeatures(i, testFile, tokenList, neChunks, MEMMTagGuess = stateList[j])
 
         testFile.close()
 
@@ -678,7 +703,8 @@ if __name__ == '__main__':
         parser.add_option('-v', '--verbose', action = 'store_true', default = False, help = 'verbose output')
         (options, args) = parser.parse_args()
         if options.verbose: print (time.asctime())
-        main()
+        #main()
+        profile.run('main()', 'mainProfiled.txt')
         if options.verbose: print (time.asctime())
         if options.verbose: print ('TOTAL TIME IN MINUTES:',)
         if options.verbose: print ((time.time() - start_time) / 60.0)
