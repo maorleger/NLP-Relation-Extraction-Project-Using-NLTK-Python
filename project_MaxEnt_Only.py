@@ -277,8 +277,10 @@ class MaxEntRelationTagger():
         # named entity
         firstNEPos = namedEntityChunks.leaf_treeposition(firstItemIndex)[0]
         if isinstance(namedEntityChunks[firstNEPos], nltk.Tree):
+            d['firstNETag'] = namedEntityChunks[firstNEPos].node
             secondNEPos = namedEntityChunks.leaf_treeposition(secondItemIndex)[0]
             if isinstance(namedEntityChunks[secondNEPos], nltk.Tree):
+                d['secondNETag'] = namedEntityChunks[secondNEPos].node
                 d['candPredNETags'] = '_'.join(
                     (namedEntityChunks[firstNEPos].node, namedEntityChunks[secondNEPos].node))
 
@@ -379,18 +381,10 @@ class MaxEntRelationTagger():
                 featuresDict['MEMMBeforeCand'] = sent[i - 1][5]
             else:
                 featuresDict['MEMMBeforeCand'] = MEMMTagGuess
-            #            if i > 1:
-            #   can use second token before candidate
-            #                featuresDict['2ndTokenBeforeCand'] = sent[i - 2][0]
-            #                featuresDict['2ndPosBeforeCand'] = sent[i - 2][1]
         if i < len(sent) - 1:
             # can use token after candidate
             featuresDict['tokenAfterCand'] = sent[i + 1][0]
             featuresDict['posAfterCand'] = sent[i + 1][1]
-        #            if i < len(sent) - 2:
-        # can use 2nd token after candidate
-        #                featuresDict['2ndTokenAfterCand'] = sent[i + 2][0]
-        #                featuresDict['2ndPosAfterCand'] = sent[i + 2][1]
         spList = zip(*sent)
         if spList[5].count('PRED') > 0:
             predIndex = spList[5].index('PRED')
@@ -495,6 +489,7 @@ class MaxEntRelationTagger():
         testFile = open(self.testFileName, 'w')
         self.writeAllWordFeatures(tokenList, testFile)
         testFile.close()
+
         i = 0
         for value in self.getMaxEntValues(className):
             (word, POS, BIO, wordNum, sentNum, keyTag) = tokenList[i][:6]
@@ -518,7 +513,7 @@ def main():
         print('Usage: python2.6 hw7.py [devFileName] [outputFileName]')
         exit(1)
     MaxEntTagger = MaxEntRelationTagger(args[0], args[1])
-    MaxEntTagger.TrainModel(100, 2)
+    #MaxEntTagger.TrainModel(100, 2)
     MaxEntTagger.MaxEntTagFile()
 
 if __name__ == '__main__':

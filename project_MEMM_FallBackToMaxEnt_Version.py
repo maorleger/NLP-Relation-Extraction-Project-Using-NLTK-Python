@@ -49,6 +49,10 @@ import numpy
 # d words
 # q
 # CTRL+d
+
+
+import operator
+
 __author__ = 'Maor Leger'
 
 import sys, os, traceback, optparse
@@ -165,7 +169,7 @@ import cProfile as profile
 #    - provide clear description of whatever you do
 
 
-fallBackCount = 0
+
 
 
 class MaxEntRelationTagger():
@@ -178,7 +182,7 @@ class MaxEntRelationTagger():
         self.testFileName, self.predictFileName = 'data/features.test', 'data/features.predictions'
         self.ARG0Classes = ['SHARE']
         self.ARG2Classes = ['SHARE', 'GROUP']
-        self.ignoredClasses = ['PRED', 'SUPPORT']
+        self.ignoredClasses = ['PRED', 'SUPPORT', 'ARGM']
 
     def readFile(self, fileName):
         """Reads a file and returns a list containing all the lines in the file"""
@@ -219,7 +223,7 @@ class MaxEntRelationTagger():
             openFiles[item] = open(self.featureFileName(item), 'w')
         oneSent = []
         #dataFile = open(self.featuresFileName, 'w')
-        totalSents = 10263
+        totalSents = 10623
         i = 0
         className = 'None'
         for item in self.taggedList:
@@ -265,30 +269,54 @@ class MaxEntRelationTagger():
         pickleFile.close()
         return taggedList
 
-    def getFeatures(self, firstItemIndex, secondItemIndex, spList):
+    def getFeatures(self, firstItemIndex, secondItemIndex, spList, namedEntityChunks):
         """A method to collect features between two tokens. Returns a dictionary of features extracted"""
+        d = {}
         candPredInSameNP = candPredInSameVP = candPredInSamePP = False
         existSupportBetweenCandPred = existVerbBetweenCandPred = False
-        supportToken = None
-        # tokensBetweenCandPred
-        tokensBetween = spList[0][firstItemIndex:secondItemIndex + 1]
-        tokensBetweenCandPred = '_'.join(tokensBetween)
 
+        # named entity
+        firstNEPos = namedEntityChunks.leaf_treeposition(firstItemIndex)[0]
+        if isinstance(namedEntityChunks[firstNEPos], nltk.Tree):
+            d['firstNETag'] = namedEntityChunks[firstNEPos].node
+            secondNEPos = namedEntityChunks.leaf_treeposition(secondItemIndex)[0]
+            if isinstance(namedEntityChunks[secondNEPos], nltk.Tree):
+                d['secondNETag'] = namedEntityChunks[secondNEPos].node
+                d['candPredNETags'] = '_'.join(
+                    (namedEntityChunks[firstNEPos].node, namedEntityChunks[secondNEPos].node))
+
+
+        # tokensBetweenCandPred
+        tokensBetween = spList[0][firstItemIndex + 1:secondItemIndex]
+        tokensBetweenCandPred = '_'.join(tokensBetween)
+        d['tokensBetweenCandPred'] = tokensBetweenCandPred
         # numberOfTokensBetween
         numberOfTokensBetween = len(tokensBetween)
+        d['numberOfTokensBetween'] = numberOfTokensBetween
+        if not numberOfTokensBetween:
+            d['NoTokensBetween'] = True
+        elif numberOfTokensBetween == 1:
+            d['WBFL'] = tokensBetween[0]
+        else:
+            d['WBF'] = tokensBetween[0]
+            d['WBL'] = tokensBetween[-1]
+        if numberOfTokensBetween > 2:
+            d['WBO'] = tokensBetween[1:-1]
+
 
         # possBetweenCandPred
-        tokensBetween = spList[1][firstItemIndex:secondItemIndex + 1]
-        possBetweenCandPred = '_'.join(tokensBetween)
+        tokensBetween = spList[1][firstItemIndex + 1:secondItemIndex]
+        d['possBetweenCandPred'] = '_'.join(tokensBetween)
+
 
         # existVerbBetweenCandPred
         for item in tokensBetween:
             if item.startswith('VB'):
-                existVerbBetweenCandPred = True
+                d['existVerbBetweenCandPred'] = True
 
         # BIOChunkChain
         tokensBetween = spList[2][firstItemIndex:secondItemIndex + 1]
-        BIOChunkChain = '_'.join(tokensBetween)
+        d['BIOChunkChain'] = '_'.join(tokensBetween)
 
 
         # ChunkChain
@@ -321,25 +349,16 @@ class MaxEntRelationTagger():
                 ChunkChain.append(item[2:])
             elif item == 'O' and tokensBetween[i - 1] != 'O':
                 ChunkChain.append('O')
-        ChunkChain = '_'.join(ChunkChain)
-
+        d['ChunkChain'] = '_'.join(ChunkChain)
+        d['candPredInSameNP'] = candPredInSameNP
+        d['candPredInSameVP'] = candPredInSameVP
+        d['candPredInSamePP'] = candPredInSamePP
         # existSupportBetweenCandPred
         tokensBetween = spList[5][firstItemIndex:secondItemIndex + 1]
         if tokensBetween.count('SUPPORT') > 0:
             existSupportBetweenCandPred = True
-
-        return {
-            'tokensBetweenCandPred': tokensBetweenCandPred,
-            'numberOfTokensBetween': numberOfTokensBetween,
-            'possBetweenCandPred': possBetweenCandPred,
-            'existVerbBetweenCandPred': existVerbBetweenCandPred,
-            'BIOChunkChain': BIOChunkChain,
-            'ChunkChain': ChunkChain,
-            'candPredInSameNP': candPredInSameNP,
-            'candPredInSameVP': candPredInSameVP,
-            'candPredInSamePP': candPredInSamePP,
-            'existSupportBetweenCandPred': existSupportBetweenCandPred,
-            }
+        d['existSupportBetweenCandPred'] = existSupportBetweenCandPred
+        return d
 
 
     def writeOneWordFeatures(self, i, outputFile, sent, namedEntityChunks, listOutput = False, MEMMTagGuess = None):
@@ -367,43 +386,19 @@ class MaxEntRelationTagger():
             # can use token after candidate
             featuresDict['tokenAfterCand'] = sent[i + 1][0]
             featuresDict['posAfterCand'] = sent[i + 1][1]
-
-        # added candNETag 4/29
-        candNEPos = namedEntityChunks.leaf_treeposition(i)[0]
-        if isinstance(namedEntityChunks[candNEPos], nltk.Tree):
-            featuresDict['candNETag'] = namedEntityChunks[candNEPos].node
-        else:
-            featuresDict['candNETag'] = 'None'
         spList = zip(*sent)
         if spList[5].count('PRED') > 0:
             predIndex = spList[5].index('PRED')
-            predNEPos = namedEntityChunks.leaf_treeposition(i)[0]
-            # added predNETag and candPredNETags 4/29
-            if isinstance(namedEntityChunks[predNEPos], nltk.Tree):
-                featuresDict['predNETag'] = namedEntityChunks[predNEPos].node
-                if featuresDict.has_key('candNETag'):
-                    featuresDict['candPredNETags'] = '_'.join((featuresDict['candNETag'], featuresDict['predNETag']))
 
+            featuresDict['predToken'] = spList[0][predIndex] # added predToken 4/29
             if spList[6][predIndex] != 'None':
-                featuresDict['predToken'] = spList[0][predIndex] # added predToken 4/29
                 featuresDict['relationClass'] = spList[6][predIndex]
-
-                if spList[5].count('SUPPORT'):
-                    # added 4/29
-                    featuresDict['supportToken'] = spList[0][spList[5].index('SUPPORT')]
             if i < predIndex:
-                featuresDict.update(self.getFeatures(i, predIndex, spList))
-                # added 4/29
-                if featuresDict.has_key('supportToken') and featuresDict.has_key('existSupportBetweenCandPred'):
-                    featuresDict['candPredSupportTokens'] = '_'.join(
-                        (featuresDict['candToken'], featuresDict['supportToken'], featuresDict['predToken']))
+                featuresDict.update(self.getFeatures(i, predIndex, spList, namedEntityChunks))
                 featuresDict['predCand'] = '_'.join((featuresDict['candToken'], featuresDict['predToken'])) # added 4/29
             else:
-                featuresDict.update(self.getFeatures(predIndex, i, spList))
-                # added 4/29
-                if featuresDict.has_key('supportToken') and featuresDict.has_key('existSupportBetweenCandPred'):
-                    featuresDict['candPredSupportTokens'] = '_'.join(
-                        (featuresDict['predToken'], featuresDict['supportToken'], featuresDict['candToken']))
+                featuresDict.update(self.getFeatures(predIndex, i, spList, namedEntityChunks))
+                featuresDict['predCand'] = '_'.join((featuresDict['predToken'], featuresDict['candToken'])) # added 4/29
         outputFile.write('{0} {1}\n'.format(" ".join(
             ['%s=%s' % (key, value) for key, value in featuresDict.iteritems() if
              key != 'output' and value != '']), featuresDict['output']))
@@ -467,7 +462,6 @@ class MaxEntRelationTagger():
             className = className[0]
             self.MEMMTagSentence(tokenList, className, outFile)
         outFile.close()
-        print('Done tagging... Out of the total, {0} sentences fell back to MaxEnt'.format(fallBackCount))
 
     def MEMMTagSentence(self, tokenList, className, outFile):
         li = [item[5] for item in tokenList]
@@ -625,7 +619,6 @@ class MaxEntRelationTagger():
         if not wordTagsList.count('ARG1'):
             # fall back to MaxEnt
             print('No ARG1 found using MEMM, falling back to MaxEnt model...')
-            fallBackCount += 1
             self.MaxEntTagSentence(tokenList, className, outFile)
             return
         wordTagsList = zip(tokenList, wordTagsList)
@@ -645,59 +638,21 @@ class MaxEntRelationTagger():
         self.writeAllWordFeatures(tokenList, testFile)
         testFile.close()
 
-
-        # Find the most probable ARG1
-        # TODO: experiment if its better to use elif or regular ifs. with regular if statements the idea is that the same word can be guessed as two predicates. With elif the idea is that each token can only have at most one sysTag. Note: if choosing regular ifs we need to modify both if statemetns below (see TO DO2) AND scoring algorithm
-
-
-        arg0Pos = arg1Pos = arg2Pos = arg3Pos = None
-        # attempt to shimmy up initial probabilities so that only high scoring results will be registered
-        arg1Prob = 0.01
-        arg0Prob = 0.5
-        arg2Prob = 0.5
-        arg3Prob = 0.5
-        pos = 0
+        i = 0
         for value in self.getMaxEntValues(className):
-            if tokenList[pos][5] in self.ignoredClasses:
-                pos += 1
-                continue
-            if value.has_key('ARG0') and arg0Prob < value['ARG0'] > 0:
-                arg0Prob = value['ARG0']
-                arg0Pos = pos
-            if value.has_key('ARG1') and arg1Prob < value['ARG1'] > 0:
-                arg1Prob = value['ARG1']
-                arg1Pos = pos
-            if value.has_key('ARG2') and arg2Prob < value['ARG2'] > 0:
-                arg2Prob = value['ARG2']
-                arg2Pos = pos
-            if value.has_key('ARG3') and arg3Prob < value['ARG3'] > 0:
-                arg3Prob = value['ARG3']
-                arg3Pos = pos
-            pos += 1
-
-        # TODO: figure out way to disambiguate between two competing tags
-        for i in xrange(0, len(tokenList)):
-            if 0 < len(tokenList[i]) < 7:
-                raise Exception('Error: Invalid token. Token: {0}'.format(tokenList[i]))
             (word, POS, BIO, wordNum, sentNum, keyTag) = tokenList[i][:6]
             keyClass = tokenList[i][6].replace('None', '')
             keyTag = keyTag.replace('None', '')
             if keyTag in self.ignoredClasses:
-                sysTag = 'USED MaxEnt' # TODO: change this later to sysTag = keyTag
-            elif i == arg0Pos:
-                sysTag = 'ARG0'
-            elif i == arg1Pos:
-                sysTag = 'ARG1'
-            elif i == arg2Pos:
-                sysTag = 'ARG2'
-            elif i == arg3Pos:
-                sysTag = 'ARG3'
+                sysTag = keyTag
             else:
-                sysTag = ''
+                sysTag = max(value.iteritems(), key = operator.itemgetter(1))[0]
+                sysTag = sysTag.replace('None', '')
             outFile.write(
                 '{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\n'.format(word, POS, BIO, wordNum, sentNum, keyTag
                                                                   ,
                                                                   sysTag, keyClass))
+            i += 1
 
 
 def main():
@@ -706,7 +661,7 @@ def main():
         print('Usage: python2.6 hw7.py [devFileName] [outputFileName]')
         exit(1)
     MaxEntTagger = MaxEntRelationTagger(args[0], args[1])
-    MaxEntTagger.TrainModel(100, 2)
+    #MaxEntTagger.TrainModel(100, 2)
     MaxEntTagger.MEMMTagFile()
 
 if __name__ == '__main__':
