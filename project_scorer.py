@@ -52,7 +52,7 @@ import time
 
 
 def score(sysOutFile):
-    argList = ['ARG0', 'ARG1', 'ARG2', 'ARG3', 'ARGM']
+    argList = ['ARG0', 'ARG1', 'ARG2', 'ARG3']
     correct = 0
     key = 0
     system = 0
