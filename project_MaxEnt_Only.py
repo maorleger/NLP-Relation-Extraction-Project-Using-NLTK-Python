@@ -48,6 +48,8 @@ LICENSE
 # d words
 # q
 # CTRL+d
+
+
 import operator
 
 __author__ = 'Maor Leger'
@@ -179,7 +181,7 @@ class MaxEntRelationTagger():
         self.testFileName, self.predictFileName = 'data/features.test', 'data/features.predictions'
         self.ARG0Classes = ['SHARE']
         self.ARG2Classes = ['SHARE', 'GROUP']
-        self.ignoredClasses = ['PRED', 'SUPPORT']
+        self.ignoredClasses = ['PRED', 'SUPPORT', 'ARGM']
 
     def readFile(self, fileName):
         """Reads a file and returns a list containing all the lines in the file"""
@@ -442,7 +444,7 @@ class MaxEntRelationTagger():
                 #self.MEMMTagSentence(tokenList, className, outFile)
                 self.MaxEntTagSentence(tokenList, className, outFile)
                 i += 1
-                print('Done. % completed = {0}'.format())
+                print('Done. % completed = {0}'.format(i / totalSents))
                 print('time to tag in seconds: ', time.time() - t)
                 tokenList = []
                 outFile.write('\n')
@@ -492,66 +494,89 @@ class MaxEntRelationTagger():
         testFile = open(self.testFileName, 'w')
         self.writeAllWordFeatures(tokenList, testFile)
         testFile.close()
-        #
-        #
-        #        # Find the most probable ARG1
-        #        # TODO: experiment if its better to use elif or regular ifs. with regular if statements the idea is that the same word can be guessed as two predicates. With elif the idea is that each token can only have at most one sysTag. Note: if choosing regular ifs we need to modify both if statemetns below (see TO DO2) AND scoring algorithm
-        #
-        #
 
-        #        arg0Pos = arg1Pos = arg2Pos = arg3Pos = None
-        #        # attempt to shimmy up initial probabilities so that only high scoring results will be registered
-        #        arg1Prob = 0.01
-        #        arg0Prob = 0.5
-        #        arg2Prob = 0.5
-        #        arg3Prob = 0.5
-        #        pos = 0
-        #        for value in self.getMaxEntValues(className):
-        #            if tokenList[pos][5] in self.ignoredClasses:
-        #                pos += 1
-        #                continue
-        #            if value.has_key('ARG0') and arg0Prob < value['ARG0'] > 0:
-        #                arg0Prob = value['ARG0']
-        #                arg0Pos = pos
-        #            if value.has_key('ARG1') and arg1Prob < value['ARG1'] > 0:
-        #                arg1Prob = value['ARG1']
-        #                arg1Pos = pos
-        #            if value.has_key('ARG2') and arg2Prob < value['ARG2'] > 0:
-        #                arg2Prob = value['ARG2']
-        #                arg2Pos = pos
-        #            if value.has_key('ARG3') and arg3Prob < value['ARG3'] > 0:
-        #                arg3Prob = value['ARG3']
-        #                arg3Pos = pos
-        #            pos += 1
+        #
+        #                # Find the most probable ARG1
+        #                # TODO: experiment if its better to use elif or regular ifs. with regular if statements the idea is that the same word can be guessed as two predicates. With elif the idea is that each token can only have at most one sysTag. Note: if choosing regular ifs we need to modify both if statemetns below (see TO DO2) AND scoring algorithm
         #
         #
-        #        # TODO: figure out way to disambiguate between two competing tags
-        #        for i in xrange(0, len(tokenList)):
-        #            if 0 < len(tokenList[i]) < 7:
-        #                raise Exception('Error: Invalid token. Token: {0}'.format(tokenList[i]))
-        #            (word, POS, BIO, wordNum, sentNum, keyTag) = tokenList[i][:6]
-        #            keyClass = tokenList[i][6].replace('None', '')
-        #            keyTag = keyTag.replace('None', '')
-        #            if keyTag in self.ignoredClasses:
-        #                sysTag = 'USED MaxEnt' # TODO: change this later to sysTag = keyTag
-        #            elif i == arg0Pos:
-        #                sysTag = 'ARG0'
-        #            elif i == arg1Pos:
-        #                sysTag = 'ARG1'
-        #            elif i == arg2Pos:
-        #                sysTag = 'ARG2'
-        #            elif i == arg3Pos:
-        #                sysTag = 'ARG3'
-        #            else:
-        #                sysTag = ''
-        #            outFile.write(
-        #                '{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\n'.format(word, POS, BIO, wordNum, sentNum, keyTag
-        #                                                                  ,
-        #                                                                  sysTag, keyClass))
-        # trying new strategy... instead of picking one with the highest value for each arg,
-        # simply for each word, select the ARG with the highest probability... this *should* allow
-        # for more than one ARG1... note, try this again with old way and new way, because new way has lower recall!!
-        # maybe I can use the experiment from before to put a threshold on accepted stuff...
+        #
+        #                arg0Pos = arg1Pos = arg2Pos = arg3Pos = None
+        #                # attempt to shimmy up initial probabilities so that only high scoring results will be registered
+        #                arg1Prob = 0.01
+        #                arg0Prob = 0.5
+        #                arg2Prob = 0.5
+        #                arg3Prob = 0.5
+        #                i = 0
+        #                for value in self.getMaxEntValues(className):
+        #                    if tokenList[i][5] in self.ignoredClasses:
+        #                        i += 1
+        #                        continue
+        #                    if value.has_key('ARG0') and arg0Prob < value['ARG0'] > 0:
+        #                        arg0Prob = value['ARG0']
+        #                        arg0Pos = i
+        #                    if value.has_key('ARG1') and arg1Prob < value['ARG1'] > 0:
+        #                        arg1Prob = value['ARG1']
+        #                        arg1Pos = i
+        #                    if value.has_key('ARG2') and arg2Prob < value['ARG2'] > 0:
+        #                        arg2Prob = value['ARG2']
+        #                        arg2Pos = i
+        #                    if value.has_key('ARG3') and arg3Prob < value['ARG3'] > 0:
+        #                        arg3Prob = value['ARG3']
+        #                        arg3Pos = i
+        #                    i += 1
+        #
+        #
+        #                # TODO: figure out way to disambiguate between two competing tags
+        #                for i in xrange(0, len(tokenList)):
+        #                    if 0 < len(tokenList[i]) < 7:
+        #                        raise Exception('Error: Invalid token. Token: {0}'.format(tokenList[i]))
+        #                    (word, POS, BIO, wordNum, sentNum, keyTag) = tokenList[i][:6]
+        #                    keyClass = tokenList[i][6].replace('None', '')
+        #                    keyTag = keyTag.replace('None', '')
+        #                    if keyTag in self.ignoredClasses:
+        #                        sysTag = 'USED MaxEnt' # TODO: change this later to sysTag = keyTag
+        #                    elif i == arg0Pos:
+        #                        sysTag = 'ARG0'
+        #                    elif i == arg1Pos:
+        #                        sysTag = 'ARG1'
+        #                    elif i == arg2Pos:
+        #                        sysTag = 'ARG2'
+        #                    elif i == arg3Pos:
+        #                        sysTag = 'ARG3'
+        #                    else:
+        #                        sysTag = ''
+        #                    outFile.write(
+        #                        '{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\n'.format(word, POS, BIO, wordNum, sentNum, keyTag
+        #                                                                          ,
+        #                                                                          sysTag, keyClass))
+        #        trying new strategy... instead of picking one with the highest value for each arg,
+        #        simply for each word, select the ARG with the highest probability... this *should* allow
+        #        for more than one ARG1... note, try this again with old way and new way, because new way has lower recall!!
+        #        maybe I can use the experiment from before to put a threshold on accepted stuff...
+        i = 0
+        arg0Pos = arg1Pos = arg2Pos = arg3Pos = None
+        arg0Prob = 0
+        arg1Prob = 0
+        arg2Prob = 0
+        arg3Prob = 0
+        for value in self.getMaxEntValues(className):
+            if tokenList[i][5] in self.ignoredClasses:
+                i += 1
+                continue
+            if value.has_key('ARG0') and arg0Prob < value['ARG0'] > 0:
+                arg0Prob = value['ARG0']
+                arg0Pos = i
+            if value.has_key('ARG1') and arg1Prob < value['ARG1'] > 0:
+                arg1Prob = value['ARG1']
+                arg1Pos = i
+            if value.has_key('ARG2') and arg2Prob < value['ARG2'] > 0:
+                arg2Prob = value['ARG2']
+                arg2Pos = i
+            if value.has_key('ARG3') and arg3Prob < value['ARG3'] > 0:
+                arg3Prob = value['ARG3']
+                arg3Pos = i
+
         i = 0
         for value in self.getMaxEntValues(className):
             (word, POS, BIO, wordNum, sentNum, keyTag) = tokenList[i][:6]
@@ -559,6 +584,14 @@ class MaxEntRelationTagger():
             keyTag = keyTag.replace('None', '')
             if keyTag in self.ignoredClasses:
                 sysTag = keyTag
+            elif i == arg0Pos:
+                sysTag = 'ARG0'
+            elif i == arg1Pos:
+                sysTag = 'ARG1'
+            elif i == arg2Pos:
+                sysTag = 'ARG2'
+            elif i == arg3Pos:
+                sysTag = 'ARG3'
             else:
                 sysTag = max(value.iteritems(), key = operator.itemgetter(1))[0]
                 sysTag = sysTag.replace('None', '')
@@ -568,12 +601,6 @@ class MaxEntRelationTagger():
                                                                   sysTag, keyClass))
             i += 1
 
-# old way (theoriginal MaxEnt): Precision = 0.76253298153	Recall = 0.688095238095	F-Score = 0.723404255319
-# new way (using operator.itemgetter(1)): Precision = 0.870967741935	Recall = 0.578571428571	F-Score = 0.695278969957
-# new way with minimum probability of 0.5: Precision = 0.875912408759	Recall = 0.571428571429	F-Score = 0.691642651297
-# try higher? No, instead, I removed some of the features because there were some issues with them...
-# So, with new way and the following features added: candPredNETags, predToken, predCand here are the results:
-# Precision: 0.879, Recall = 0.57, F-Score = 0.69
 
 def main():
     global options, args
