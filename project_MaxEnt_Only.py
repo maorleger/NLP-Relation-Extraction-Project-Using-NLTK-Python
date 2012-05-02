@@ -285,8 +285,8 @@ class MaxEntRelationTagger():
 
         # tokensBetweenCandPred
         tokensBetween = spList[0][firstItemIndex + 1:secondItemIndex]
-        #tokensBetweenCandPred = '_'.join(tokensBetween)
-        #d['tokensBetweenCandPred'] = tokensBetweenCandPred
+        tokensBetweenCandPred = '_'.join(tokensBetween)
+        d['tokensBetweenCandPred'] = tokensBetweenCandPred
         # numberOfTokensBetween
         numberOfTokensBetween = len(tokensBetween)
         d['numberOfTokensBetween'] = numberOfTokensBetween
@@ -379,18 +379,18 @@ class MaxEntRelationTagger():
                 featuresDict['MEMMBeforeCand'] = sent[i - 1][5]
             else:
                 featuresDict['MEMMBeforeCand'] = MEMMTagGuess
-            if i > 1:
-                # can use second token before candidate
-                featuresDict['2ndTokenBeforeCand'] = sent[i - 2][0]
-                featuresDict['2ndPosBeforeCand'] = sent[i - 2][1]
+            #            if i > 1:
+            #   can use second token before candidate
+            #                featuresDict['2ndTokenBeforeCand'] = sent[i - 2][0]
+            #                featuresDict['2ndPosBeforeCand'] = sent[i - 2][1]
         if i < len(sent) - 1:
             # can use token after candidate
             featuresDict['tokenAfterCand'] = sent[i + 1][0]
             featuresDict['posAfterCand'] = sent[i + 1][1]
-            if i < len(sent) - 2:
-                # can use 2nd token after candidate
-                featuresDict['2ndTokenAfterCand'] = sent[i + 2][0]
-                featuresDict['2ndPosAfterCand'] = sent[i + 2][1]
+        #            if i < len(sent) - 2:
+        # can use 2nd token after candidate
+        #                featuresDict['2ndTokenAfterCand'] = sent[i + 2][0]
+        #                featuresDict['2ndPosAfterCand'] = sent[i + 2][1]
         spList = zip(*sent)
         if spList[5].count('PRED') > 0:
             predIndex = spList[5].index('PRED')
