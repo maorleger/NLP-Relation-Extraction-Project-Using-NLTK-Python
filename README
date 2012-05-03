@@ -15,3 +15,22 @@ correct = 219.0	system = 239.0	key = 420.0
 false tags = 20	missed tags = 201
 
 Precision = 0.916317991632	Recall = 0.521428571429	F-Score = 0.66464339909
+
+after adding stemmed version of tokensBetween and bigramsBetween:
+
+
+
+after adding tokenBeforePred, posBeforePred, tokenAfterPred, posAfterPred:
+correct = 219.0	system = 239.0	key = 420.0
+
+false tags = 20	missed tags = 201
+
+Precision = 0.916317991632	Recall = 0.521428571429	F-Score = 0.66464339909
+
+after adding candSynsetsLexTypes, predSynsetsLexTypes
+correct = 222.0	system = 241.0	key = 420.0
+
+false tags = 19	missed tags = 198
+
+Precision = 0.921161825726	Recall = 0.528571428571	F-Score = 0.671709531014
+

@@ -289,9 +289,11 @@ class MaxEntRelationTagger():
             d['NoTokensBetween'] = True
         elif numberOfTokensBetween == 1:
             d['WBFL'] = tokensBetween[0]
+            d['NoTokensBetween'] = False
         else:
             d['WBF'] = tokensBetween[0]
             d['WBL'] = tokensBetween[-1]
+            d['NoTokensBetween'] = False
         if numberOfTokensBetween > 2:
             d['WBO'] = '_'.join(tokensBetween[1:-1])
             d['bigramsBetweenCandPred'] = '_'.join(['_'.join(item) for item in nltk.bigrams(tokensBetween)])
@@ -377,7 +379,7 @@ class MaxEntRelationTagger():
         if candSynsets:
             d['candSynsetsLexTypes'] = '_'.join(set([synset.lexname for synset in candSynsets]))
         else:
-            d['candSynsetsLexTypes'] = ''
+            d['candSynsetsLexTypes'] = 'None'
 
         if sent[pred][1].startswith('JJ'):
             # adjective
@@ -397,17 +399,19 @@ class MaxEntRelationTagger():
         if predSynsets:
             d['predSynsetsLexTypes'] = '_'.join(set([synset.lexname for synset in predSynsets]))
         else:
-            d['predSynsetsLexTypes'] = ''
+            d['predSynsetsLexTypes'] = 'None'
         if predSynsets and candSynsets:
             d['predCandPathSimilarity'] = predSynsets[0].path_similarity(candSynsets[0])
             d['predCandwupSimilarity'] = predSynsets[0].wup_similarity(candSynsets[0])
+            d['candPredSynsetsLexTypes'] = '_'.join(
+                (d['candSynsetsLexTypes'], d['predSynsetsLexTypes']))
             lch = predSynsets[0].lowest_common_hypernyms(candSynsets[0])
             if lch:
                 d['lowestCommonHypernym'] = lch[0].name
 
         return d
 
-    def writeOneWordFeatures(self, i, outputFile, sent, namedEntityChunks, listOutput = False, MEMMTagGuess = None):
+    def writeOneWordFeatures(self, i, outputFile, sent, namedEntityChunks, listOutput = False):
         featuresDict = {
             'candToken': sent[i][0],
             'candTokenPOS': sent[i][1]
@@ -425,10 +429,11 @@ class MaxEntRelationTagger():
             featuresDict['tokenBeforeCand'] = sent[i - 1][0]
             featuresDict['posBeforeCand'] = sent[i - 1][1]
             # added to convert MaxEnt model to MEMM
-            if MEMMTagGuess is None:
-                featuresDict['MEMMBeforeCand'] = sent[i - 1][5]
-            else:
-                featuresDict['MEMMBeforeCand'] = MEMMTagGuess
+            # TODO: do I need this????
+        #            if MEMMTagGuess is None:
+        #                featuresDict['MEMMBeforeCand'] = sent[i - 1][5]
+        #            else:
+        #                featuresDict['MEMMBeforeCand'] = MEMMTagGuess
         if i < len(sent) - 1:
             # can use token after candidate
             featuresDict['tokenAfterCand'] = sent[i + 1][0]
@@ -437,8 +442,7 @@ class MaxEntRelationTagger():
         if spList[5].count('PRED') > 0:
             predIndex = spList[5].index('PRED')
             featuresDict.update(self.GetWordNetFeatures(i, sent, predIndex))
-            featuresDict['candPredSynsetsLexTypes'] = '_'.join(
-                (featuresDict['candSynsetsLexTypes'], featuresDict['predSynsetsLexTypes']))
+            featuresDict['predTokenPOS'] = sent[predIndex][1]
             if predIndex > 0:
                 featuresDict['tokenBeforePred'] = sent[predIndex - 1][0]
                 featuresDict['posBeforePred'] = sent[predIndex - 1][1]
@@ -467,13 +471,12 @@ class MaxEntRelationTagger():
             else:
                 featuresDict.update(self.getFeatures(predIndex, i, spList, namedEntityChunks))
                 featuresDict['predCand'] = '_'.join((featuresDict['predToken'], featuresDict['candToken'])) # added 4/29
-        x = 5
         outputFile.write('{0} {1}\n'.format(" ".join(
             ['%s=%s' % (key, value) for key, value in featuresDict.iteritems() if
              key != 'output' and value != '']), featuresDict['output']))
 
 
-    def writeAllWordFeatures(self, sent, outputFile, listOutput = False, limitedSet = False, MEMMTagGuess = None):
+    def writeAllWordFeatures(self, sent, outputFile, listOutput = False, limitedSet = False):
         """Extracts features for each token in the sentence and writes those features to the output file
         Used in 2 ways:
         1. To train a model by appending the outcome at the end of the feature list
@@ -489,7 +492,7 @@ class MaxEntRelationTagger():
         for i in xrange(0, len(sent)):
             if not limitedSet or (sent[i][5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3'] or sent[i][1] in negPOSSampleList):
                 # kept limited set of negative samples... see commit
-                self.writeOneWordFeatures(i, outputFile, sent, namedEntityChunks, listOutput, MEMMTagGuess)
+                self.writeOneWordFeatures(i, outputFile, sent, namedEntityChunks, listOutput)
 
 
     def GetPredictions(self, test, model, predict):

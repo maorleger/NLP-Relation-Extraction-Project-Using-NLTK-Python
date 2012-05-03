@@ -41,6 +41,18 @@ LICENSE
 
 """
 import numpy
+# TODO: MAKE SURE THE INSTRUCTIONS TELL ANG TO DOWNLOAD NLTK NE CHUNKER AS FOLLOWS:
+# python2.6
+# import nltk
+# nltk.download()
+# d maxent_ne_chunker
+# d words
+# d wordnet
+# q
+# CTRL+d
+
+
+from nltk.corpus import wordnet as wn
 
 __author__ = 'Maor Leger'
 
@@ -49,6 +61,7 @@ import time
 import re
 import subprocess as sub
 import cPickle as pickle
+import nltk
 #
 #Some specs:
 #first six columns are same as hw7.
@@ -159,21 +172,18 @@ import cPickle as pickle
 
 
 
-
 class MaxEntRelationTagger():
     """The MaxEntRelationTagger class - contains everything needed to run a MaxEntRelationTagger tagger"""
 
     def __init__(self, devFileName, outFileName):
         """constructor for MaxEntRelationTagger"""
-        if devFileName == 'data/dev-subset':
-            self.trainingFileName = 'data/training-subset'
-        else:
-            self.trainingFileName = 'data/training'
+        self.trainingFileName = 'data/training'
         self.devFileName, self.outFileName = devFileName, outFileName
         self.testFileName, self.predictFileName = 'data/features.test', 'data/features.predictions'
         self.ARG0Classes = ['SHARE']
         self.ARG2Classes = ['SHARE', 'GROUP']
-        self.ignoredClasses = ['PRED', 'SUPPORT']
+        self.ignoredClasses = ['PRED', 'SUPPORT', 'ARGM']
+        self.porter = nltk.PorterStemmer()
 
     def readFile(self, fileName):
         """Reads a file and returns a list containing all the lines in the file"""
@@ -214,7 +224,7 @@ class MaxEntRelationTagger():
             openFiles[item] = open(self.featureFileName(item), 'w')
         oneSent = []
         #dataFile = open(self.featuresFileName, 'w')
-        totalSents = 10263
+        totalSents = 10623
         i = 0
         className = 'None'
         for item in self.taggedList:
@@ -260,30 +270,63 @@ class MaxEntRelationTagger():
         pickleFile.close()
         return taggedList
 
-    def getFeatures(self, firstItemIndex, secondItemIndex, spList):
+    def getFeatures(self, firstItemIndex, secondItemIndex, spList, namedEntityChunks):
         """A method to collect features between two tokens. Returns a dictionary of features extracted"""
+        d = {}
         candPredInSameNP = candPredInSameVP = candPredInSamePP = False
         existSupportBetweenCandPred = existVerbBetweenCandPred = False
 
+        # named entity
+        firstNEPos = namedEntityChunks.leaf_treeposition(firstItemIndex)[0]
+        if isinstance(namedEntityChunks[firstNEPos], nltk.Tree):
+            d['firstNETag'] = namedEntityChunks[firstNEPos].node
+            secondNEPos = namedEntityChunks.leaf_treeposition(secondItemIndex)[0]
+            if isinstance(namedEntityChunks[secondNEPos], nltk.Tree):
+                d['secondNETag'] = namedEntityChunks[secondNEPos].node
+                d['candPredNETags'] = '_'.join(
+                    (namedEntityChunks[firstNEPos].node, namedEntityChunks[secondNEPos].node))
+
+
         # tokensBetweenCandPred
-        tokensBetween = spList[0][firstItemIndex:secondItemIndex + 1]
+        tokensBetween = spList[0][firstItemIndex + 1:secondItemIndex]
         tokensBetweenCandPred = '_'.join(tokensBetween)
 
+        d['tokensBetweenCandPred'] = tokensBetweenCandPred
         # numberOfTokensBetween
         numberOfTokensBetween = len(tokensBetween)
+        d['numberOfTokensBetween'] = numberOfTokensBetween
+        if not numberOfTokensBetween:
+            d['NoTokensBetween'] = True
+        elif numberOfTokensBetween == 1:
+            d['WBFL'] = tokensBetween[0]
+            d['NoTokensBetween'] = False
+        else:
+            d['WBF'] = tokensBetween[0]
+            d['WBL'] = tokensBetween[-1]
+            d['NoTokensBetween'] = False
+        if numberOfTokensBetween > 2:
+            d['WBO'] = '_'.join(tokensBetween[1:-1])
+            d['bigramsBetweenCandPred'] = '_'.join(['_'.join(item) for item in nltk.bigrams(tokensBetween)])
+            tokensBetween = [self.porter.stem(token) for token in tokensBetween]
+            d['stemmedTokensBetween'] = '_'.join(tokensBetween)
+            d['stemmedBigramsBetween'] = '_'.join(['_'.join(item) for item in nltk.bigrams(tokensBetween)])
+
+
 
         # possBetweenCandPred
-        tokensBetween = spList[1][firstItemIndex:secondItemIndex + 1]
-        possBetweenCandPred = '_'.join(tokensBetween)
+        tokensBetween = spList[1][firstItemIndex + 1:secondItemIndex]
+        d['possBetweenCandPred'] = '_'.join(tokensBetween)
+
 
         # existVerbBetweenCandPred
         for item in tokensBetween:
             if item.startswith('VB'):
-                existVerbBetweenCandPred = True
+                d['existVerbBetweenCandPred'] = True
 
         # BIOChunkChain
         tokensBetween = spList[2][firstItemIndex:secondItemIndex + 1]
-        BIOChunkChain = '_'.join(tokensBetween)
+        d['BIOChunkChain'] = '_'.join(tokensBetween)
+
 
         # ChunkChain
         ChunkChain = [re.sub(r'[A-Za-z]-', '', tokensBetween[0])]
@@ -315,32 +358,75 @@ class MaxEntRelationTagger():
                 ChunkChain.append(item[2:])
             elif item == 'O' and tokensBetween[i - 1] != 'O':
                 ChunkChain.append('O')
-        ChunkChain = '_'.join(ChunkChain)
-
+        d['ChunkChain'] = '_'.join(ChunkChain)
+        d['candPredInSameNP'] = candPredInSameNP
+        d['candPredInSameVP'] = candPredInSameVP
+        d['candPredInSamePP'] = candPredInSamePP
         # existSupportBetweenCandPred
         tokensBetween = spList[5][firstItemIndex:secondItemIndex + 1]
         if tokensBetween.count('SUPPORT') > 0:
             existSupportBetweenCandPred = True
-
-        return {
-            'tokensBetweenCandPred': tokensBetweenCandPred,
-            'numberOfTokensBetween': numberOfTokensBetween,
-            'possBetweenCandPred': possBetweenCandPred,
-            'existVerbBetweenCandPred': existVerbBetweenCandPred,
-            'BIOChunkChain': BIOChunkChain,
-            'ChunkChain': ChunkChain,
-            'candPredInSameNP': candPredInSameNP,
-            'candPredInSameVP': candPredInSameVP,
-            'candPredInSamePP': candPredInSamePP,
-            'existSupportBetweenCandPred': existSupportBetweenCandPred
-        }
+        d['existSupportBetweenCandPred'] = existSupportBetweenCandPred
+        return d
 
 
-    def writeOneWordFeatures(self, i, outputFile, sent, listOutput = False, MEMMTagGuess = None):
+    def GetWordNetFeatures(self, cand, sent, pred):
+        d = {}
+        if sent[cand][1].startswith('JJ'):
+            # adjective
+            candSynsets = wn.synsets(sent[cand][0], pos = wn.ADJ)
+        elif sent[cand][1].startswith('RB') or sent[cand][1] == 'WRB':
+            # Adverb
+            candSynsets = wn.synsets(sent[cand][0], pos = wn.ADV)
+        elif sent[cand][1].startswith('NN'):
+            # Noun
+            candSynsets = wn.synsets(sent[cand][0], pos = wn.NOUN)
+        elif sent[cand][1].startswith('VB'):
+            # Verb
+            candSynsets = wn.synsets(sent[cand][0], pos = wn.VERB)
+        else:
+            candSynsets = []
+        if candSynsets:
+            d['candSynsetsLexTypes'] = '_'.join(set([synset.lexname for synset in candSynsets]))
+        else:
+            d['candSynsetsLexTypes'] = 'None'
+
+        if sent[pred][1].startswith('JJ'):
+            # adjective
+            predSynsets = wn.synsets(sent[pred][0], pos = wn.ADJ)
+
+        elif sent[pred][1].startswith('RB') or sent[pred][1] == 'WRB':
+            # Adverb
+            predSynsets = wn.synsets(sent[pred][0], pos = wn.ADV)
+        elif sent[pred][1].startswith('NN'):
+            # Noun
+            predSynsets = wn.synsets(sent[pred][0], pos = wn.NOUN)
+        elif sent[pred][1].startswith('VB'):
+            # Verb
+            predSynsets = wn.synsets(sent[pred][0], pos = wn.VERB)
+        else:
+            predSynsets = []
+        if predSynsets:
+            d['predSynsetsLexTypes'] = '_'.join(set([synset.lexname for synset in predSynsets]))
+        else:
+            d['predSynsetsLexTypes'] = 'None'
+        if predSynsets and candSynsets:
+            d['predCandPathSimilarity'] = predSynsets[0].path_similarity(candSynsets[0])
+            d['predCandwupSimilarity'] = predSynsets[0].wup_similarity(candSynsets[0])
+            d['candPredSynsetsLexTypes'] = '_'.join(
+                (d['candSynsetsLexTypes'], d['predSynsetsLexTypes']))
+            lch = predSynsets[0].lowest_common_hypernyms(candSynsets[0])
+            if lch:
+                d['lowestCommonHypernym'] = lch[0].name
+
+        return d
+
+    def writeOneWordFeatures(self, i, outputFile, sent, namedEntityChunks, listOutput = False, MEMMTagGuess = None):
         featuresDict = {
             'candToken': sent[i][0],
             'candTokenPOS': sent[i][1]
         }
+
         if listOutput:
             if sent[i][5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
                 featuresDict['output'] = sent[i][5]
@@ -353,6 +439,7 @@ class MaxEntRelationTagger():
             featuresDict['tokenBeforeCand'] = sent[i - 1][0]
             featuresDict['posBeforeCand'] = sent[i - 1][1]
             # added to convert MaxEnt model to MEMM
+            # TODO: do I need this????
             if MEMMTagGuess is None:
                 featuresDict['MEMMBeforeCand'] = sent[i - 1][5]
             else:
@@ -364,15 +451,40 @@ class MaxEntRelationTagger():
         spList = zip(*sent)
         if spList[5].count('PRED') > 0:
             predIndex = spList[5].index('PRED')
+            featuresDict.update(self.GetWordNetFeatures(i, sent, predIndex))
+            featuresDict['predTokenPOS'] = sent[predIndex][1]
+            if predIndex > 0:
+                featuresDict['tokenBeforePred'] = sent[predIndex - 1][0]
+                featuresDict['posBeforePred'] = sent[predIndex - 1][1]
+            if predIndex < len(sent) - 1:
+                featuresDict['tokenAfterPred'] = sent[predIndex + 1][0]
+                featuresDict['posAfterPred'] = sent[predIndex + 1][0]
+                # added named entity mentions
+            NEPos = namedEntityChunks.leaf_treeposition(i)[0]
+            if isinstance(namedEntityChunks[NEPos], nltk.Tree):
+                featuresDict['candNETag'] = namedEntityChunks[NEPos].node
+            else:
+                featuresDict['candNETag'] = 'None'
+            NEPos = namedEntityChunks.leaf_treeposition(predIndex)[0]
+            if isinstance(namedEntityChunks[NEPos], nltk.Tree):
+                featuresDict['predNETag'] = namedEntityChunks[NEPos].node
+            else:
+                featuresDict['predNETag'] = 'None'
+            featuresDict['candPredNETags'] = '_'.join((featuresDict['candNETag'], featuresDict['predNETag']))
+
+            featuresDict['predToken'] = spList[0][predIndex] # added predToken 4/29
             if spList[6][predIndex] != 'None':
                 featuresDict['relationClass'] = spList[6][predIndex]
             if i < predIndex:
-                featuresDict.update(self.getFeatures(i, predIndex, spList))
+                featuresDict.update(self.getFeatures(i, predIndex, spList, namedEntityChunks))
+                featuresDict['predCand'] = '_'.join((featuresDict['candToken'], featuresDict['predToken'])) # added 4/29
             else:
-                featuresDict.update(self.getFeatures(predIndex, i, spList))
+                featuresDict.update(self.getFeatures(predIndex, i, spList, namedEntityChunks))
+                featuresDict['predCand'] = '_'.join((featuresDict['predToken'], featuresDict['candToken'])) # added 4/29
         outputFile.write('{0} {1}\n'.format(" ".join(
             ['%s=%s' % (key, value) for key, value in featuresDict.iteritems() if
              key != 'output' and value != '']), featuresDict['output']))
+
 
     def writeAllWordFeatures(self, sent, outputFile, listOutput = False, limitedSet = False, MEMMTagGuess = None):
         """Extracts features for each token in the sentence and writes those features to the output file
@@ -382,13 +494,15 @@ class MaxEntRelationTagger():
         """
 
         # Only consider negative samples if the POS is in negPOSSampleList
-
+        # original list, includes everything
         negPOSSampleList = ['NN', 'NNS', 'NNP', 'VBD', 'PRP$', 'JJ', 'IN', 'VB', 'VBN', 'VBG', 'VBZ', 'CD', 'PRP',
                             'NNPS', 'VBP', 'DT', 'JJR', 'WP$', 'WP', 'RBR', 'RB', 'JJS', 'WDT', 'TO', '$', 'WRB', '``']
+
+        namedEntityChunks = nltk.ne_chunk([item[:2] for item in sent])
         for i in xrange(0, len(sent)):
             if not limitedSet or (sent[i][5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3'] or sent[i][1] in negPOSSampleList):
                 # kept limited set of negative samples... see commit
-                self.writeOneWordFeatures(i, outputFile, sent, listOutput, MEMMTagGuess)
+                self.writeOneWordFeatures(i, outputFile, sent, namedEntityChunks, listOutput, MEMMTagGuess)
 
 
     def GetPredictions(self, test, model, predict):
@@ -448,7 +562,7 @@ class MaxEntRelationTagger():
         T = len(tokenList)
         predPos = li.index('PRED')
         if li.count('SUPPORT'):
-            supportPos = li.index('SUPPORT')
+            supportPos = [i for i, val in enumerate(li) if val == 'SUPPORT']
         else:
             supportPos = None
         viterbi = numpy.zeros((N, T + 2), dtype = numpy.object)
@@ -457,11 +571,12 @@ class MaxEntRelationTagger():
         # first column, put a 1.0 in start symbol
         viterbi[0, 0] = 1.0
 
+        neChunks = nltk.ne_chunk([item[:2] for item in tokenList])
         testFile = open(self.testFileName, 'w')
-        self.writeOneWordFeatures(0, testFile, tokenList, MEMMTagGuess = 'None')
+        self.writeOneWordFeatures(0, testFile, tokenList, neChunks, MEMMTagGuess = 'None')
         for i in xrange(1, len(tokenList)):
             for j in xrange(1, len(stateList) - 1):
-                self.writeOneWordFeatures(i, testFile, tokenList, MEMMTagGuess = stateList[j])
+                self.writeOneWordFeatures(i, testFile, tokenList, neChunks, MEMMTagGuess = stateList[j])
 
         testFile.close()
 
@@ -513,7 +628,7 @@ class MaxEntRelationTagger():
                         prevMEMMTag = 'PRED'
                         break
                 continue
-            elif supportPos is not None and ts - 1 == supportPos:
+            elif supportPos is not None and ts - 1 in supportPos:
                 # we are in the support
                 viterbi[7, ts] = 1.0
                 for key, value in stateList.iteritems():

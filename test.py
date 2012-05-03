@@ -27,16 +27,16 @@ print synsets[0].lowest_common_hypernyms(synsets2[0])[0].name
 #print synsets[0].lch_similarity(synsets2[0])
 #print synsets2[0].lch_similarity(synsets[0])
 
-# print('_'.join(set([synset.lexname for synset in synsets])))
+print('_'.join(set([synset.lexname for synset in synsets])))
 # Print the information
-# for synset in synsets:
-# print "-" * 10
-# print "Name:", synset.name
-# print "Lexical Type:", synset.lexname
-#     print "Lemmas:", synset.lemma_names
-#     print "Definition:", synset.definition
-#     for example in synset.examples:
-#         print "Example:", example
+for synset in synsets:
+    print "-" * 10
+    print "Name:", synset.name
+    print "Lexical Type:", synset.lexname
+    print "Lemmas:", synset.lemma_names
+    print "Definition:", synset.definition
+    for example in synset.examples:
+        print "Example:", example
 # 
 # for synset in synsets2:
 #     print "-" * 10
