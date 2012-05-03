@@ -293,7 +293,7 @@ class MaxEntRelationTagger():
             d['WBF'] = tokensBetween[0]
             d['WBL'] = tokensBetween[-1]
         if numberOfTokensBetween > 2:
-            d['WBO'] = tokensBetween[1:-1]
+            d['WBO'] = '_'.join(tokensBetween[1:-1])
             d['bigramsBetweenCandPred'] = '_'.join(['_'.join(item) for item in nltk.bigrams(tokensBetween)])
             tokensBetween = [self.porter.stem(token) for token in tokensBetween]
             d['stemmedTokensBetween'] = '_'.join(tokensBetween)
@@ -358,33 +358,60 @@ class MaxEntRelationTagger():
         return d
 
 
-    def GetWordNetFeatures(self, i, sent):
-        if sent[i][1].startswith('JJ'):
+    def GetWordNetFeatures(self, cand, sent, pred):
+        d = {}
+        if sent[cand][1].startswith('JJ'):
             # adjective
-            synsets = wn.synsets(sent[i][0], pos = wn.ADJ)
-
-        elif sent[i][1].startswith('RB') or sent[i][1] == 'WRB':
+            candSynsets = wn.synsets(sent[cand][0], pos = wn.ADJ)
+        elif sent[cand][1].startswith('RB') or sent[cand][1] == 'WRB':
             # Adverb
-            synsets = wn.synsets(sent[i][0], pos = wn.ADV)
-        elif sent[i][1].startswith('NN'):
+            candSynsets = wn.synsets(sent[cand][0], pos = wn.ADV)
+        elif sent[cand][1].startswith('NN'):
             # Noun
-            synsets = wn.synsets(sent[i][0], pos = wn.NOUN)
-        elif sent[i][1].startswith('VB'):
+            candSynsets = wn.synsets(sent[cand][0], pos = wn.NOUN)
+        elif sent[cand][1].startswith('VB'):
             # Verb
-            synsets = wn.synsets(sent[i][0], pos = wn.VERB)
+            candSynsets = wn.synsets(sent[cand][0], pos = wn.VERB)
         else:
-            synsets = []
-        if synsets:
-            return '_'.join(set([synset.lexname for synset in synsets]))
+            candSynsets = []
+        if candSynsets:
+            d['candSynsetsLexTypes'] = '_'.join(set([synset.lexname for synset in candSynsets]))
         else:
-            return ''
+            d['candSynsetsLexTypes'] = ''
+
+        if sent[pred][1].startswith('JJ'):
+            # adjective
+            predSynsets = wn.synsets(sent[pred][0], pos = wn.ADJ)
+
+        elif sent[pred][1].startswith('RB') or sent[pred][1] == 'WRB':
+            # Adverb
+            predSynsets = wn.synsets(sent[pred][0], pos = wn.ADV)
+        elif sent[pred][1].startswith('NN'):
+            # Noun
+            predSynsets = wn.synsets(sent[pred][0], pos = wn.NOUN)
+        elif sent[pred][1].startswith('VB'):
+            # Verb
+            predSynsets = wn.synsets(sent[pred][0], pos = wn.VERB)
+        else:
+            predSynsets = []
+        if predSynsets:
+            d['predSynsetsLexTypes'] = '_'.join(set([synset.lexname for synset in predSynsets]))
+        else:
+            d['predSynsetsLexTypes'] = ''
+        if predSynsets and candSynsets:
+            d['predCandPathSimilarity'] = predSynsets[0].path_similarity(candSynsets[0])
+            d['predCandwupSimilarity'] = predSynsets[0].wup_similarity(candSynsets[0])
+            lch = predSynsets[0].lowest_common_hypernyms(candSynsets[0])
+            if lch:
+                d['lowestCommonHypernym'] = lch[0].name
+
+        return d
 
     def writeOneWordFeatures(self, i, outputFile, sent, namedEntityChunks, listOutput = False, MEMMTagGuess = None):
         featuresDict = {
             'candToken': sent[i][0],
             'candTokenPOS': sent[i][1]
         }
-        featuresDict['candSynsetsLexTypes'] = self.GetWordNetFeatures(i, sent)
 
         if listOutput:
             if sent[i][5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
@@ -409,7 +436,7 @@ class MaxEntRelationTagger():
         spList = zip(*sent)
         if spList[5].count('PRED') > 0:
             predIndex = spList[5].index('PRED')
-            featuresDict['predSynsetsLexTypes'] = self.GetWordNetFeatures(predIndex, sent)
+            featuresDict.update(self.GetWordNetFeatures(i, sent, predIndex))
             featuresDict['candPredSynsetsLexTypes'] = '_'.join(
                 (featuresDict['candSynsetsLexTypes'], featuresDict['predSynsetsLexTypes']))
             if predIndex > 0:
