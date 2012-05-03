@@ -46,11 +46,13 @@ LICENSE
 # nltk.download()
 # d maxent_ne_chunker
 # d words
+# d wordnet
 # q
 # CTRL+d
 
 
 import operator
+from nltk.corpus import wordnet as wn
 
 __author__ = 'Maor Leger'
 
@@ -182,6 +184,7 @@ class MaxEntRelationTagger():
         self.ARG0Classes = ['SHARE']
         self.ARG2Classes = ['SHARE', 'GROUP']
         self.ignoredClasses = ['PRED', 'SUPPORT', 'ARGM']
+        self.porter = nltk.PorterStemmer()
 
     def readFile(self, fileName):
         """Reads a file and returns a list containing all the lines in the file"""
@@ -274,20 +277,10 @@ class MaxEntRelationTagger():
         candPredInSameNP = candPredInSameVP = candPredInSamePP = False
         existSupportBetweenCandPred = existVerbBetweenCandPred = False
 
-        # named entity
-        firstNEPos = namedEntityChunks.leaf_treeposition(firstItemIndex)[0]
-        if isinstance(namedEntityChunks[firstNEPos], nltk.Tree):
-            d['firstNETag'] = namedEntityChunks[firstNEPos].node
-            secondNEPos = namedEntityChunks.leaf_treeposition(secondItemIndex)[0]
-            if isinstance(namedEntityChunks[secondNEPos], nltk.Tree):
-                d['secondNETag'] = namedEntityChunks[secondNEPos].node
-                d['candPredNETags'] = '_'.join(
-                    (namedEntityChunks[firstNEPos].node, namedEntityChunks[secondNEPos].node))
-
-
         # tokensBetweenCandPred
         tokensBetween = spList[0][firstItemIndex + 1:secondItemIndex]
         tokensBetweenCandPred = '_'.join(tokensBetween)
+
         d['tokensBetweenCandPred'] = tokensBetweenCandPred
         # numberOfTokensBetween
         numberOfTokensBetween = len(tokensBetween)
@@ -301,6 +294,11 @@ class MaxEntRelationTagger():
             d['WBL'] = tokensBetween[-1]
         if numberOfTokensBetween > 2:
             d['WBO'] = tokensBetween[1:-1]
+            d['bigramsBetweenCandPred'] = '_'.join(['_'.join(item) for item in nltk.bigrams(tokensBetween)])
+            tokensBetween = [self.porter.stem(token) for token in tokensBetween]
+            d['stemmedTokensBetween'] = '_'.join(tokensBetween)
+            d['stemmedBigramsBetween'] = '_'.join(['_'.join(item) for item in nltk.bigrams(tokensBetween)])
+
 
 
         # possBetweenCandPred
@@ -360,11 +358,34 @@ class MaxEntRelationTagger():
         return d
 
 
+    def GetWordNetFeatures(self, i, sent):
+        if sent[i][1].startswith('JJ'):
+            # adjective
+            synsets = wn.synsets(sent[i][0], pos = wn.ADJ)
+
+        elif sent[i][1].startswith('RB') or sent[i][1] == 'WRB':
+            # Adverb
+            synsets = wn.synsets(sent[i][0], pos = wn.ADV)
+        elif sent[i][1].startswith('NN'):
+            # Noun
+            synsets = wn.synsets(sent[i][0], pos = wn.NOUN)
+        elif sent[i][1].startswith('VB'):
+            # Verb
+            synsets = wn.synsets(sent[i][0], pos = wn.VERB)
+        else:
+            synsets = []
+        if synsets:
+            return '_'.join(set([synset.lexname for synset in synsets]))
+        else:
+            return ''
+
     def writeOneWordFeatures(self, i, outputFile, sent, namedEntityChunks, listOutput = False, MEMMTagGuess = None):
         featuresDict = {
             'candToken': sent[i][0],
             'candTokenPOS': sent[i][1]
         }
+        featuresDict['candSynsetsLexTypes'] = self.GetWordNetFeatures(i, sent)
+
         if listOutput:
             if sent[i][5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3']:
                 featuresDict['output'] = sent[i][5]
@@ -388,6 +409,27 @@ class MaxEntRelationTagger():
         spList = zip(*sent)
         if spList[5].count('PRED') > 0:
             predIndex = spList[5].index('PRED')
+            featuresDict['predSynsetsLexTypes'] = self.GetWordNetFeatures(predIndex, sent)
+            featuresDict['candPredSynsetsLexTypes'] = '_'.join(
+                (featuresDict['candSynsetsLexTypes'], featuresDict['predSynsetsLexTypes']))
+            if predIndex > 0:
+                featuresDict['tokenBeforePred'] = sent[predIndex - 1][0]
+                featuresDict['posBeforePred'] = sent[predIndex - 1][1]
+            if predIndex < len(sent) - 1:
+                featuresDict['tokenAfterPred'] = sent[predIndex + 1][0]
+                featuresDict['posAfterPred'] = sent[predIndex + 1][0]
+                # added named entity mentions
+            NEPos = namedEntityChunks.leaf_treeposition(i)[0]
+            if isinstance(namedEntityChunks[NEPos], nltk.Tree):
+                featuresDict['candNETag'] = namedEntityChunks[NEPos].node
+            else:
+                featuresDict['candNETag'] = 'None'
+            NEPos = namedEntityChunks.leaf_treeposition(predIndex)[0]
+            if isinstance(namedEntityChunks[NEPos], nltk.Tree):
+                featuresDict['predNETag'] = namedEntityChunks[NEPos].node
+            else:
+                featuresDict['predNETag'] = 'None'
+            featuresDict['candPredNETags'] = '_'.join((featuresDict['candNETag'], featuresDict['predNETag']))
 
             featuresDict['predToken'] = spList[0][predIndex] # added predToken 4/29
             if spList[6][predIndex] != 'None':
@@ -398,9 +440,11 @@ class MaxEntRelationTagger():
             else:
                 featuresDict.update(self.getFeatures(predIndex, i, spList, namedEntityChunks))
                 featuresDict['predCand'] = '_'.join((featuresDict['predToken'], featuresDict['candToken'])) # added 4/29
+        x = 5
         outputFile.write('{0} {1}\n'.format(" ".join(
             ['%s=%s' % (key, value) for key, value in featuresDict.iteritems() if
              key != 'output' and value != '']), featuresDict['output']))
+
 
     def writeAllWordFeatures(self, sent, outputFile, listOutput = False, limitedSet = False, MEMMTagGuess = None):
         """Extracts features for each token in the sentence and writes those features to the output file
@@ -410,9 +454,10 @@ class MaxEntRelationTagger():
         """
 
         # Only consider negative samples if the POS is in negPOSSampleList
-
+        # original list, includes everything
         negPOSSampleList = ['NN', 'NNS', 'NNP', 'VBD', 'PRP$', 'JJ', 'IN', 'VB', 'VBN', 'VBG', 'VBZ', 'CD', 'PRP',
                             'NNPS', 'VBP', 'DT', 'JJR', 'WP$', 'WP', 'RBR', 'RB', 'JJS', 'WDT', 'TO', '$', 'WRB', '``']
+
         namedEntityChunks = nltk.ne_chunk([item[:2] for item in sent])
         for i in xrange(0, len(sent)):
             if not limitedSet or (sent[i][5] in ['ARG0', 'ARG1', 'ARG2', 'ARG3'] or sent[i][1] in negPOSSampleList):
@@ -513,7 +558,7 @@ def main():
         print('Usage: python2.6 hw7.py [devFileName] [outputFileName]')
         exit(1)
     MaxEntTagger = MaxEntRelationTagger(args[0], args[1])
-    #MaxEntTagger.TrainModel(100, 2)
+    MaxEntTagger.TrainModel(100, 2)
     MaxEntTagger.MaxEntTagFile()
 
 if __name__ == '__main__':

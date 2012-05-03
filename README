@@ -1,1 +1,17 @@
 This file was created by PyCharm 2.0.2 for binding GitHub repository
+
+before adding bigramsBetweenCandPred:
+Number of sentences = 343	 Number of tokens = 10789
+
+correct = 218.0	system = 238.0	key = 420.0
+
+false tags = 20	missed tags = 202
+
+Precision = 0.915966386555	Recall = 0.519047619048	F-Score = 0.662613981763
+
+after adding bigramsBetweenCandPred:
+correct = 219.0	system = 239.0	key = 420.0
+
+false tags = 20	missed tags = 201
+
+Precision = 0.916317991632	Recall = 0.521428571429	F-Score = 0.66464339909
