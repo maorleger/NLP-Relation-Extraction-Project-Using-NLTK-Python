@@ -1,36 +1,49 @@
-This file was created by PyCharm 2.0.2 for binding GitHub repository
+Final project for NLP.
 
-before adding bigramsBetweenCandPred:
-Number of sentences = 343	 Number of tokens = 10789
+Instructions:
+System Project: For a system project, you are expected to implement an NLP program that is somewhat more ambitious than any of the homework projects. 
+First, you should aim to produce baseline system: a simple system that you can be fairly confident will produce a measurable result. This system should be as simple as possible. It should proves the feasibility of your plan. However, the results from this system do not need to be very high quality.
+You should conduct a series of experiments which may or may not improve your system.  These experiments can be more ambitious. You should try to learn from your results and revise your experiments as you go. If you methodically follow a line of reasoning in your experiments, but do not ultimately have an improvement over your baseline system, that is actually OK. Good results are nice, but we are also looking for good methodology in your experimentation.
+Your system can be based on manual rules, machine learning (or similar methods), or some combination.
+Write a report which includes: a) a system description; b) results and analysis of results; c) compares your work with previous work.
+Submit the report and your final system, along with any data and instructions, so your system can be tested.
 
-correct = 218.0	system = 238.0	key = 420.0
+README
 
-false tags = 20	missed tags = 202
+pre-requisites:
+1. python2.6 or higher with NLTK installed
 
-Precision = 0.915966386555	Recall = 0.519047619048	F-Score = 0.662613981763
+2. The following data should be available to NLTK: maxent_ne_chunker, words, and wordnet
+	To install the above data enter the following in order into a terminal window:
+	python2.6
+	import nltk
+	nltk.download()
+	d maxent_ne_chunker
+	d words
+	d wordnet
+	q
+	CTRL + d (to exit Python console)
+3. The following files and folders should be available (assuming you are in the project's directory):
+	1. ./project.py
+	2. ./project_scorer.py
+	3. ./MaxEntCreatModel.jar
+	4. ./MaxEntPredict.jar
+	5. ./data/training
 
-after adding bigramsBetweenCandPred:
-correct = 219.0	system = 239.0	key = 420.0
+running:
+1. cd into the project's root directory and type the following into a terminal windows:
+2. project:
+	python2.6 project.py [-v] testingFileName outputFileName
+	where testingFileName is the relative path to the testing file and outputFileName is the desired name of the output file
+3. scorer:
+	python2.6 project_scorer [-v] outputFileName
+	where outputFileName is the relative path to the file just created in step (2)
+ex:
+cd ~/school/NLP/project
+python2.6 project.py -v data/dev data/output
+python2.6 project_scorer.py data/output
 
-false tags = 20	missed tags = 201
-
-Precision = 0.916317991632	Recall = 0.521428571429	F-Score = 0.66464339909
-
-after adding stemmed version of tokensBetween and bigramsBetween:
 
 
 
-after adding tokenBeforePred, posBeforePred, tokenAfterPred, posAfterPred:
-correct = 219.0	system = 239.0	key = 420.0
-
-false tags = 20	missed tags = 201
-
-Precision = 0.916317991632	Recall = 0.521428571429	F-Score = 0.66464339909
-
-after adding candSynsetsLexTypes, predSynsetsLexTypes
-correct = 222.0	system = 241.0	key = 420.0
-
-false tags = 19	missed tags = 198
-
-Precision = 0.921161825726	Recall = 0.528571428571	F-Score = 0.671709531014
 
