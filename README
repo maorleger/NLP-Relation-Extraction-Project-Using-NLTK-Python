@@ -1,12 +1,6 @@
 Final project for NLP.
 
-Instructions:
-System Project: For a system project, you are expected to implement an NLP program that is somewhat more ambitious than any of the homework projects. 
-First, you should aim to produce baseline system: a simple system that you can be fairly confident will produce a measurable result. This system should be as simple as possible. It should proves the feasibility of your plan. However, the results from this system do not need to be very high quality.
-You should conduct a series of experiments which may or may not improve your system.  These experiments can be more ambitious. You should try to learn from your results and revise your experiments as you go. If you methodically follow a line of reasoning in your experiments, but do not ultimately have an improvement over your baseline system, that is actually OK. Good results are nice, but we are also looking for good methodology in your experimentation.
-Your system can be based on manual rules, machine learning (or similar methods), or some combination.
-Write a report which includes: a) a system description; b) results and analysis of results; c) compares your work with previous work.
-Submit the report and your final system, along with any data and instructions, so your system can be tested.
+Please see the MaorLeger_ProjectDoc.pdf file for additional information about the experiments and results.
 
 README
 
