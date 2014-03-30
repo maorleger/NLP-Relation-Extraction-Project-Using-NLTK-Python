@@ -33,7 +33,6 @@ running:
 	python2.6 project_scorer [-v] outputFileName
 	where outputFileName is the relative path to the file just created in step (2)
 ex:
-cd ~/school/NLP/project
 python2.6 project.py -v data/dev data/output
 python2.6 project_scorer.py data/output
 
